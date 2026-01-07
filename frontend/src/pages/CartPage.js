@@ -298,7 +298,8 @@ const CartPage = () => {
                       <div className="quantity-control">
                         <button 
                           className="qty-btn"
-                          onClick={() => updateQuantity(apiId, item.quantity - 1)}
+                            onClick={() => item.quantity > 1 && updateQuantity(apiId, item.quantity - 1)}
+                            disabled={item.quantity <= 1}
                         >
                           <FiMinus size={16} />
                         </button>

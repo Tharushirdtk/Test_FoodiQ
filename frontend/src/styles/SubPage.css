@@ -125,6 +125,11 @@
   box-shadow: 0 2px 8px var(--shadow-color);
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* ensure consistent card heights so footer aligns */
+  min-height: 160px;
 }
 
 .card-item:hover {
@@ -184,6 +189,11 @@
 .card-body {
   color: var(--text-gray);
   font-size: 14px;
+  /* allow body to grow so footer stays at bottom */
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .card-body p {
@@ -197,6 +207,7 @@
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .card-price {

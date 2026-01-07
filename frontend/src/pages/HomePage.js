@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
 import useProducts from '../hooks/useProducts';
 import { FiMenu, FiShoppingBag, FiSearch, FiStar, FiClock, FiX, FiLoader } from 'react-icons/fi';
 import NotificationsButton from '../components/NotificationsButton';
@@ -9,6 +10,7 @@ import '../styles/HomePage.css';
 const HomePage = () => {
   const navigate = useNavigate();
   const { getCartCount, addToCart } = useCart();
+  const toast = useToast();
   const [deliveryMethod, setDeliveryMethod] = useState('delivery');
   const [searchInput, setSearchInput] = useState('');
 
@@ -21,7 +23,7 @@ const HomePage = () => {
     setSearch,
     setCategory,
     setPage,
-  } = useProducts({ limit: 8 });
+  } = useProducts({ limit: 12 });
 
   // Debounce search
   useEffect(() => {
@@ -225,6 +227,9 @@ const HomePage = () => {
                         onClick={(e) => {
                           e.stopPropagation();
                           addToCart(item);
+                          if (toast && typeof toast.showToast === 'function') {
+                            toast.showToast(`${item.name} added to cart`, { type: 'success', duration: 2000 });
+                          }
                         }}
                       >
                         +

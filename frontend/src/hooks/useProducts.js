@@ -110,17 +110,22 @@ export default function useProducts(initialParams = {}) {
     setParams(prev => ({ ...prev, page }));
   }, []);
 
+  // Update limit (items per page)
+  const setLimit = useCallback((limit) => {
+    setParams(prev => ({ ...prev, limit, page: 1 }));
+  }, []);
+
   // Reset all filters
   const resetFilters = useCallback(() => {
-    setParams({
+    setParams(prev => ({
       page: 1,
-      limit: 12,
+      limit: prev.limit || 12,
       search: '',
       category: 'All',
       minPrice: undefined,
       maxPrice: undefined,
       sort: '',
-    });
+    }));
   }, []);
 
   // Manual refresh
@@ -143,5 +148,6 @@ export default function useProducts(initialParams = {}) {
     loadMore,
     resetFilters,
     refresh,
+    setLimit,
   };
 }

@@ -198,6 +198,12 @@
   transform: scale(1.2);
 }
 
+.qty-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .quantity {
   font-size: 14px;
   font-weight: 600;

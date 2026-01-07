@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
 import { 
   FiSearch, FiStar, FiHeart, FiChevronUp, FiChevronDown, 
   FiX, FiLoader, FiGrid, FiList, FiSliders, FiClock
@@ -14,6 +15,7 @@ import NotificationsButton from '../components/NotificationsButton';
 const StorePage = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const toast = useToast();
   
   // View mode: 'grid' | 'list'
   const [viewMode, setViewMode] = useState('grid');
@@ -422,6 +424,9 @@ const StorePage = () => {
                           onClick={(e) => {
                             e.stopPropagation();
                             addToCart(item);
+                            if (toast && typeof toast.showToast === 'function') {
+                              toast.showToast(`${item.name} added to cart`, { type: 'success', duration: 2000 });
+                            }
                           }}
                         >
                           Add +

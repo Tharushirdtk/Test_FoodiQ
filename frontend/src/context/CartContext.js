@@ -57,7 +57,8 @@ export const CartProvider = ({ children }) => {
         if (created) {
           setCartItems((prev) => prev.map((i) => {
             if (i.id === item.id && JSON.stringify(i.options) === JSON.stringify(options)) {
-              return { ...i, cartItemId: created._id || created.id || created.cartItemId };
+              const newId = created._id || created.id || created.cartItemId;
+              return { ...i, cartItemId: newId };
             }
             return i;
           }));
@@ -69,8 +70,13 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = (itemId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
-    cartService.removeFromCart(itemId).catch(() => {});
+    // Resolve backend id before updating local state
+    const found = cartItems.find((it) => it.id === itemId || it.cartItemId === itemId);
+    const backendId = found?.cartItemId || itemId;
+
+    setCartItems((prevItems) => prevItems.filter((item) => (item.id !== itemId && item.cartItemId !== itemId)));
+
+    cartService.removeFromCart(backendId).catch(() => {});
   };
 
   const updateQuantity = (itemId, quantity) => {
@@ -78,12 +84,17 @@ export const CartProvider = ({ children }) => {
       removeFromCart(itemId);
       return;
     }
+    // Resolve backend id before updating local state
+    const found = cartItems.find((it) => it.id === itemId || it.cartItemId === itemId);
+    const backendId = found?.cartItemId || itemId;
+
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item.id === itemId ? { ...item, quantity } : item
+        (item.id === itemId || item.cartItemId === itemId) ? { ...item, quantity } : item
       )
     );
-    cartService.updateCartItem(itemId, quantity).catch(() => {});
+
+    cartService.updateCartItem(backendId, quantity).catch(() => {});
   };
 
   const clearCart = () => {
@@ -105,7 +116,10 @@ export const CartProvider = ({ children }) => {
           // if item has product field, use that
           const product = it.product || it.productId || {};
           return {
-            id: it._id || it.id || (product._id || product.id),
+            // `id` is the product id when available; `cartItemId` is the backend cart item id
+            id: product._id || product.id || it._id || it.id,
+            cartItemId: it._id || it.id,
+            productId: product._id || product.id,
             name: product.name || it.name,
             price: Number(product.price ?? it.price) || 0,
             image: product.image || it.image || '',

@@ -23,6 +23,8 @@ const OrderTrackingPage = () => {
 
   const [showDriverDialog, setShowDriverDialog] = useState(false);
   const [driverDialogMessage, setDriverDialogMessage] = useState('');
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   const handleShowDriverPhone = () => {
     setDriverDialogMessage(`Driver's Phone: ${driverPhone}`);
@@ -49,6 +51,19 @@ const OrderTrackingPage = () => {
   const createdAt = liveOrder?.createdAt;
   const updatedAt = liveOrder?.updatedAt;
   const currentIndex = statusFlow.findIndex(s => s.key === currentStatus);
+
+  const getStatusBadge = (status) => {
+    const map = {
+      pending: { label: 'Pending', class: 'pending' },
+      confirmed: { label: 'Confirmed', class: 'pending' },
+      preparing: { label: 'Preparing', class: 'pending' },
+      ready: { label: 'Ready', class: 'pending' },
+      delivering: { label: 'On the way', class: 'pending' },
+      delivered: { label: 'Delivered', class: 'completed' },
+      cancelled: { label: 'Cancelled', class: 'cancelled' }
+    };
+    return map[status] || { label: status, class: 'pending' };
+  };
 
   // tracking view does not require item list or totals
 
@@ -84,12 +99,20 @@ const OrderTrackingPage = () => {
         </button>
         <div className="header-info">
           <h1>Order #{id}</h1>
-          <span className="order-badge">ON TIME</span>
+          {liveOrder && (
+            (() => {
+              const s = getStatusBadge(liveOrder.status);
+              return <span className={`order-badge ${s.class}`}>{s.label}</span>;
+            })()
+          )}
         </div>
         <button className="btn-text help-btn">Help</button>
       </header>
 
       <div className="tracking-content">
+        {liveOrder?.status === 'cancelled' && (
+          <div className="cancelled-banner">This order has been cancelled.</div>
+        )}
         {/* Arrival Info */}
         <div className="arrival-card">
           <div className="arrival-icon">🚚</div>
@@ -167,10 +190,41 @@ const OrderTrackingPage = () => {
           </div>
         </div>
 
-        {/* Cancel Order */}
-        <button className="btn cancel-order-btn">
-          Cancel Order
-        </button>
+        {/* Cancel Order (hidden when already cancelled) */}
+        {liveOrder?.status !== 'cancelled' && (
+          <>
+            <ConfirmDialog
+              isOpen={showCancelConfirm}
+              onClose={() => setShowCancelConfirm(false)}
+              onConfirm={async () => {
+                setCancelling(true);
+                try {
+                  const res = await orderService.cancelOrder(id);
+                  const updated = res.order || res;
+                  setLiveOrder(updated);
+                } catch (e) {
+                  console.error('Failed to cancel order', e);
+                } finally {
+                  setCancelling(false);
+                  setShowCancelConfirm(false);
+                }
+              }}
+              title="Cancel Order"
+              message="Are you sure you want to cancel this order? This action cannot be undone."
+              confirmText={cancelling ? 'Cancelling...' : 'Yes, Cancel'}
+              cancelText="No"
+              variant="danger"
+            />
+
+            <button
+              className="btn cancel-order-btn"
+              onClick={() => setShowCancelConfirm(true)}
+              disabled={['delivered'].includes(liveOrder?.status) || cancelling}
+            >
+              {cancelling ? 'Cancelling...' : 'Cancel Order'}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

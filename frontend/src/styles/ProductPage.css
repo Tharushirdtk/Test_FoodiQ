@@ -16,6 +16,18 @@
   align-items: center;
 }
 
+.product-header .header-title {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .header-actions {
   display: flex;
   gap: 8px;
@@ -95,7 +107,7 @@
 
 /* Product Image Section */
 .product-image-section {
-  background: var(--bg-dark, #1a1a1a);
+  background: var(--bg-light);
   padding: 40px 20px 60px;
   display: flex;
   justify-content: center;

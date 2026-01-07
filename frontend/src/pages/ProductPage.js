@@ -246,6 +246,7 @@ const ProductPage = () => {
         <button className="btn btn-icon" onClick={() => navigate(-1)}>
           <FiArrowLeft size={24} />
         </button>
+        <h1 className="header-title">{product.name}</h1>
         <div className="header-actions">
           <button 
             className={`btn btn-icon ${isFavorite ? 'favorite active' : ''}`}

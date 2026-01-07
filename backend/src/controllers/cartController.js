@@ -60,7 +60,8 @@ exports.updateCartItem = async (req, res) => {
     if (options !== undefined) item.options = options;
 
     if (item.quantity <= 0) {
-      await item.remove();
+      // use deleteOne for compatibility with Mongoose v7+ (document.remove may be absent)
+      await item.deleteOne();
       return res.status(200).json({ message: 'Item removed' });
     }
 
@@ -83,7 +84,8 @@ exports.removeCartItem = async (req, res) => {
     if (!item) return res.status(404).json({ message: 'Cart item not found' });
     if (item.user.toString() !== userId.toString()) return res.status(403).json({ message: 'Forbidden' });
 
-    await item.remove();
+    // use deleteOne to remove the document
+    await item.deleteOne();
     return res.status(200).json({ message: 'Item removed' });
   } catch (error) {
     console.error(error);

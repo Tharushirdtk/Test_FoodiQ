@@ -33,6 +33,7 @@ const OrdersPage = () => {
     if (activeTab === 'all') return true;
     if (activeTab === 'active') return ['pending', 'confirmed', 'preparing', 'delivering', 'ready'].includes(order.status);
     if (activeTab === 'completed') return order.status === 'delivered';
+    if (activeTab === 'cancelled') return order.status === 'cancelled';
     return true;
   });
 
@@ -94,6 +95,12 @@ const OrdersPage = () => {
             onClick={() => setActiveTab('completed')}
           >
             Completed
+          </button>
+          <button 
+            className={`tab ${activeTab === 'cancelled' ? 'active' : ''}`}
+            onClick={() => setActiveTab('cancelled')}
+          >
+            Cancelled
           </button>
         </div>
 

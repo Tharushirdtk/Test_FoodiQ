@@ -98,6 +98,7 @@ function BottomNav() {
   const location = useLocation();
   const { getCartCount } = useCart();
   const pathname = location.pathname || '/';
+  const { isAuthenticated, isGuest } = useAuth();
 
   // don't show on auth flows
   const hidePaths = [
@@ -111,6 +112,9 @@ function BottomNav() {
   ];
 
   if (hidePaths.some(p => pathname.startsWith(p))) return null;
+
+  // Hide bottom nav on root when the app is showing Login for unauthenticated users
+  if (pathname === '/' && !isAuthenticated && !isGuest) return null;
 
   return (
     <nav className="bottom-nav">

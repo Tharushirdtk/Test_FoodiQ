@@ -15,7 +15,8 @@ const createTransporter = () => {
 
 // Base email template with FoodiQ theme
 const getEmailTemplate = (content, previewText = '') => {
-  const logoUrl = 'https://i.ibb.co/qFdsPp22/logo.png';
+  // switched to Postimg host as requested
+  const logoUrl = 'https://i.postimg.cc/brZQhckn/logo.png';
   
   return `
 <!DOCTYPE html>
@@ -51,12 +52,6 @@ const getEmailTemplate = (content, previewText = '') => {
       color: #ffffff;
       margin: 0;
       letter-spacing: -1px;
-    }
-    .logo-img {
-      max-width: 120px;
-      max-height: 80px;
-      margin: 0 auto;
-      display: block;
     }
     .logo-text {
       color: #ffffff;
@@ -147,8 +142,9 @@ const getEmailTemplate = (content, previewText = '') => {
   <div style="padding: 24px;">
     <div class="container">
       <div class="header">
-        <img src="${logoUrl}" alt="FoodiQ Logo" class="logo-img" style="max-width: 120px; max-height: 80px;" onerror="this.style.display='none'" />
-        <div class="logo-text" style="color: #ffffff; font-size: 24px; font-weight: 700; margin-top: 12px;">🍔 FoodiQ</div>
+        <div style="width:80px;height:80px;margin:0 auto;border-radius:50%;border:2px solid #FF6B35;padding:4px;background:transparent;">
+          <img src="${logoUrl}" alt="FoodiQ Logo" style="width:100%;height:100%;display:block;border-radius:50%;object-fit:cover;" />
+        </div>
       </div>
       ${content}
       <div class="footer">

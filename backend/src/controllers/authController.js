@@ -1,0 +1,702 @@
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const User = require('../models/User');
+const Address = require('../models/Address');
+const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/mailer');
+const { sendVerificationCode } = require('../utils/smsProvider');
+
+// Generate JWT
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: '30d',
+  });
+};
+
+// @desc    Register Step 1 - Create account with basic info
+// @route   POST /api/auth/register/step1
+// @access  Public
+const registerStep1 = async (req, res) => {
+  try {
+    const { name, email, password, birthdate, gender } = req.validatedBody || req.body;
+
+    if (!name || !email || !password || !birthdate) {
+      return res.status(400).json({ message: 'Please provide all required fields' });
+    }
+
+    // Check if user exists (but don't reveal it)
+    const userExists = await User.findOne({ email: email.toLowerCase() });
+    if (userExists) {
+      // Return generic success to prevent email enumeration
+      return res.status(200).json({
+        message: 'If this email is not already registered, a verification email has been sent.',
+        step: 2,
+        // Don't send userId to prevent enumeration
+      });
+    }
+
+    // Create user
+    const user = await User.create({
+      name,
+      email: email.toLowerCase(),
+      password,
+      birthdate,
+      gender: gender || null,
+      emailVerified: false,
+      registrationStep: 1,
+    });
+
+    // Generate and send verification email
+    const emailToken = user.generateEmailVerificationToken();
+    await user.save({ validateBeforeSave: false });
+
+    try {
+      await sendVerificationEmail(user, emailToken);
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError);
+      // Continue anyway - user can request resend
+    }
+
+    res.status(201).json({
+      message: 'Account created! A verification email has been sent. Please continue to complete your registration.',
+      step: 2,
+      userId: user._id,
+    });
+  } catch (error) {
+    console.error('Register Step 1 error:', error);
+    if (error.code === 11000) {
+      // Duplicate key - email exists
+      return res.status(200).json({
+        message: 'If this email is not already registered, a verification email has been sent.',
+        step: 2,
+      });
+    }
+    res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
+};
+
+// @desc    Register Step 2 - Add contact and address info (Legacy - kept for compatibility)
+// @route   POST /api/auth/register/step2
+// @access  Public (with userId from step1)
+const registerStep2 = async (req, res) => {
+  try {
+    const { userId, phone, phoneCountry, skipAddress, address } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found. Please start registration again.' });
+    }
+
+    // Update phone if provided
+    if (phone) {
+      user.phone = phone;
+      user.phoneCountry = phoneCountry || null;
+      user.phoneVerified = false;
+    }
+
+    // Create address if provided and not skipped
+    if (!skipAddress && address && address.street) {
+      await Address.create({
+        user: user._id,
+        type: address.type || 'home',
+        street: address.street,
+        city: address.city,
+        state: address.state,
+        zip: address.zip,
+        country: address.country || 'Sri Lanka',
+      });
+    }
+
+    // Mark registration as complete
+    user.registrationStep = 2;
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      message: 'Registration complete! Please check your email to verify your account, then log in.',
+      success: true,
+    });
+  } catch (error) {
+    console.error('Register Step 2 error:', error);
+    res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
+};
+
+// @desc    Full Registration - Create account with all info in one call
+// @route   POST /api/auth/register
+// @access  Public
+const registerFull = async (req, res) => {
+  try {
+    const { 
+      name, email, password, birthdate, gender,
+      phone, phoneCountry, phoneVerified,
+      skipAddress, address 
+    } = req.body;
+
+    if (!name || !email || !password || !birthdate) {
+      return res.status(400).json({ message: 'Please provide all required fields' });
+    }
+
+    // Check if user exists (but don't reveal it for security)
+    const userExists = await User.findOne({ email: email.toLowerCase() });
+    if (userExists) {
+      // Return generic message to prevent email enumeration
+      return res.status(200).json({
+        message: 'If this email is not already registered, a verification email has been sent.',
+        success: false,
+      });
+    }
+
+    // Create user with all info
+    const user = await User.create({
+      name,
+      email: email.toLowerCase(),
+      password,
+      birthdate,
+      gender: gender || null,
+      phone: phone || null,
+      phoneCountry: phoneCountry || null,
+      phoneVerified: phoneVerified || false,
+      emailVerified: false,
+      registrationStep: 2, // Complete registration
+    });
+
+    // Create address if provided and not skipped
+    if (!skipAddress && address && address.street) {
+      await Address.create({
+        user: user._id,
+        type: address.type || 'home',
+        street: address.street,
+        city: address.city,
+        state: address.state,
+        zip: address.zip,
+        country: address.country || 'Sri Lanka',
+      });
+    }
+
+    // Generate and send verification email
+    const emailToken = user.generateEmailVerificationToken();
+    await user.save({ validateBeforeSave: false });
+
+    let emailSent = false;
+    let emailError = null;
+    try {
+      await sendVerificationEmail(user, emailToken);
+      emailSent = true;
+    } catch (err) {
+      console.error('Failed to send verification email:', err);
+      emailError = err.message || 'Failed to send verification email';
+      // Continue anyway - user can request resend
+    }
+
+    res.status(201).json({
+      message: emailSent 
+        ? 'Registration complete! Please check your email to verify your account.'
+        : 'Registration complete! However, we could not send the verification email. Please request a new one from the login page.',
+      success: true,
+      emailSent,
+      ...(emailError && { emailWarning: 'Verification email could not be sent. You can request a resend after logging in.' }),
+    });
+  } catch (error) {
+    console.error('Register Full error:', error);
+    if (error.code === 11000) {
+      // Duplicate key - email exists
+      return res.status(200).json({
+        message: 'If this email is not already registered, a verification email has been sent.',
+        success: false,
+      });
+    }
+    res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
+};
+
+// @desc    Send phone verification code
+// @route   POST /api/auth/send-phone-code or /api/auth/phone/send-otp
+// @access  Public (with userId) or Private (with token)
+const sendPhoneCode = async (req, res) => {
+  try {
+    const { userId, phone, phoneCountry } = req.body;
+
+    // Get user from either userId param or authenticated user
+    let user;
+    if (req.user) {
+      // Authenticated user
+      user = await User.findById(req.user.id).select('+phoneVerificationCode');
+    } else if (userId) {
+      // Registration flow
+      user = await User.findById(userId).select('+phoneVerificationCode');
+    } else {
+      return res.status(400).json({ message: 'User ID or authentication required' });
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // If phone provided, update it; otherwise use existing
+    const phoneToVerify = phone || user.phone;
+    if (!phoneToVerify) {
+      return res.status(400).json({ message: 'Phone number is required' });
+    }
+
+    // Update phone number if provided
+    if (phone) {
+      user.phone = phone;
+      user.phoneCountry = phoneCountry || user.phoneCountry || null;
+      user.phoneVerified = false; // Reset verification for new number
+    }
+
+    // Generate code
+    const code = user.generatePhoneVerificationCode();
+    await user.save({ validateBeforeSave: false });
+
+    // Send SMS
+    const result = await sendVerificationCode(phoneToVerify, code);
+
+    res.status(200).json({
+      message: 'Verification code sent to your phone',
+      // In mock mode, return the code for testing
+      ...(result.mock && result.code && { code: result.code }),
+    });
+  } catch (error) {
+    console.error('Send phone code error:', error);
+    res.status(500).json({ message: error.message || 'Failed to send verification code' });
+  }
+};
+
+// @desc    Verify phone code
+// @route   POST /api/auth/verify-phone or /api/auth/phone/verify-otp
+// @access  Public (with userId) or Private (with token)
+const verifyPhone = async (req, res) => {
+  try {
+    const { userId, code, otp, phone } = req.body;
+    const verificationCode = code || otp; // Support both param names
+
+    if (!verificationCode) {
+      return res.status(400).json({ message: 'Verification code is required' });
+    }
+
+    // Get user from either userId param or authenticated user
+    let user;
+    if (req.user) {
+      user = await User.findById(req.user.id).select('+phoneVerificationCode phoneVerificationExpiresAt phone');
+    } else if (userId) {
+      user = await User.findById(userId).select('+phoneVerificationCode phoneVerificationExpiresAt phone');
+    } else {
+      return res.status(400).json({ message: 'User ID or authentication required' });
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Use phone from request if user doesn't have one stored (edge case)
+    const phoneToVerify = user.phone || phone;
+    if (!phoneToVerify) {
+      return res.status(400).json({ message: 'No phone number to verify' });
+    }
+
+    // If user doesn't have phone but we have it from request, update it
+    if (!user.phone && phone) {
+      user.phone = phone;
+    }
+
+    // Verify the code
+    if (!user.verifyPhoneCode(verificationCode)) {
+      return res.status(400).json({ message: 'Invalid or expired verification code' });
+    }
+
+    // Mark as verified and clear code
+    user.phoneVerified = true;
+    user.phoneVerificationCode = undefined;
+    user.phoneVerificationExpiresAt = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      message: 'Phone number verified successfully',
+      phoneVerified: true,
+    });
+  } catch (error) {
+    console.error('Verify phone error:', error);
+    res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
+};
+
+// @desc    Verify email token
+// @route   GET /api/auth/verify-email
+// @access  Public
+const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ message: 'Verification token is required' });
+    }
+
+    // Hash the token to compare with DB
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await User.findOne({
+      emailVerificationToken: hashedToken,
+      emailVerificationExpiresAt: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired verification link' });
+    }
+
+    // Mark email as verified
+    user.emailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpiresAt = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      message: 'Email verified successfully! You can now log in.',
+      emailVerified: true,
+    });
+  } catch (error) {
+    console.error('Verify email error:', error);
+    res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
+};
+
+// @desc    Resend verification email
+// @route   POST /api/auth/resend-email
+// @access  Public
+const resendVerificationEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    // Always return success to prevent enumeration
+    const successMessage = 'If an account exists with this email, a verification link has been sent.';
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(200).json({ message: successMessage });
+    }
+
+    if (user.emailVerified) {
+      return res.status(200).json({ message: 'Email is already verified. You can log in.' });
+    }
+
+    // Generate new token
+    const emailToken = user.generateEmailVerificationToken();
+    await user.save({ validateBeforeSave: false });
+
+    try {
+      await sendVerificationEmail(user, emailToken);
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError);
+    }
+
+    res.status(200).json({ message: successMessage });
+  } catch (error) {
+    console.error('Resend email error:', error);
+    res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
+};
+
+// @desc    Forgot password - request reset
+// @route   POST /api/auth/forgot-password
+// @access  Public
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.validatedBody || req.body;
+
+    // Always return success to prevent enumeration
+    const successMessage = 'If an account exists with this email, a password reset link has been sent.';
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(200).json({ message: successMessage });
+    }
+
+    // Generate reset token
+    const resetToken = user.generatePasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+
+    try {
+      await sendPasswordResetEmail(user, resetToken);
+    } catch (emailError) {
+      console.error('Failed to send password reset email:', emailError);
+      user.passwordResetToken = undefined;
+      user.passwordResetExpiresAt = undefined;
+      await user.save({ validateBeforeSave: false });
+      return res.status(500).json({ message: 'Failed to send email. Please try again.' });
+    }
+
+    res.status(200).json({ message: successMessage });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
+};
+
+// @desc    Reset password
+// @route   POST /api/auth/reset-password
+// @access  Public
+const resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.validatedBody || req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ message: 'Token and new password are required' });
+    }
+
+    // Hash the token to compare with DB
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpiresAt: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset link. Please request a new one.' });
+    }
+
+    // Update password
+    user.password = password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpiresAt = undefined;
+    await user.save();
+
+    res.status(200).json({
+      message: 'Password updated successfully! You can now log in with your new password.',
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
+};
+
+// @desc    Authenticate a user (login)
+// @route   POST /api/auth/login
+// @access  Public
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.validatedBody || req.body;
+
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Please provide email and password' });
+    }
+
+    // Check for user - use generic message to prevent enumeration
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Check if email is verified
+    if (!user.emailVerified) {
+      return res.status(403).json({
+        message: 'Please verify your email before logging in. Check your inbox or spam folder.',
+        emailNotVerified: true,
+        email: user.email,
+      });
+    }
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      displayName: user.displayName,
+      phone: user.phone,
+      phoneVerified: user.phoneVerified,
+      emailVerified: user.emailVerified,
+      birthdate: user.birthdate,
+      gender: user.gender,
+      token: generateToken(user._id),
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Get current logged in user
+// @route   GET /api/auth/me
+// @access  Private
+const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    
+    // Get user's addresses
+    const addresses = await Address.find({ user: req.user.id });
+
+    res.status(200).json({
+      ...user.toObject(),
+      addresses,
+      age: user.getAge(),
+    });
+  } catch (error) {
+    console.error('Get me error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Resend phone verification code (for logged in users)
+// @route   POST /api/auth/resend-phone-code
+// @access  Private
+const resendPhoneCode = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('+phoneVerificationCode');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (!user.phone) {
+      return res.status(400).json({ message: 'No phone number on file. Please add a phone number first.' });
+    }
+
+    if (user.phoneVerified) {
+      return res.status(400).json({ message: 'Phone number is already verified' });
+    }
+
+    // Generate new code
+    const code = user.generatePhoneVerificationCode();
+    await user.save({ validateBeforeSave: false });
+
+    // Send SMS
+    const result = await sendVerificationCode(user.phone, code);
+
+    res.status(200).json({
+      message: 'Verification code sent to your phone',
+      ...(result.mock && result.code && { code: result.code }),
+    });
+  } catch (error) {
+    console.error('Resend phone code error:', error);
+    res.status(500).json({ message: error.message || 'Failed to send verification code' });
+  }
+};
+
+// @desc    Verify phone code (for logged in users)
+// @route   POST /api/auth/verify-phone-authenticated
+// @access  Private
+const verifyPhoneAuthenticated = async (req, res) => {
+  try {
+    const { code } = req.body;
+
+    if (!code) {
+      return res.status(400).json({ message: 'Verification code is required' });
+    }
+
+    const user = await User.findById(req.user.id).select('+phoneVerificationCode phoneVerificationExpiresAt');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (!user.phone) {
+      return res.status(400).json({ message: 'No phone number to verify' });
+    }
+
+    if (user.phoneVerified) {
+      return res.status(400).json({ message: 'Phone number is already verified' });
+    }
+
+    // Verify the code
+    if (!user.verifyPhoneCode(code)) {
+      return res.status(400).json({ message: 'Invalid or expired verification code' });
+    }
+
+    // Mark as verified
+    user.phoneVerified = true;
+    user.phoneVerificationCode = undefined;
+    user.phoneVerificationExpiresAt = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      message: 'Phone number verified successfully',
+      phoneVerified: true,
+    });
+  } catch (error) {
+    console.error('Verify phone authenticated error:', error);
+    res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
+};
+
+// @desc    Update phone number (for logged in users)
+// @route   PUT /api/auth/phone
+// @access  Private
+const updatePhone = async (req, res) => {
+  try {
+    const { phone, phoneCountry } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({ message: 'Phone number is required' });
+    }
+
+    const user = await User.findById(req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update phone - reset verification status
+    user.phone = phone;
+    user.phoneCountry = phoneCountry || null;
+    user.phoneVerified = false;
+    user.phoneVerificationCode = undefined;
+    user.phoneVerificationExpiresAt = undefined;
+
+    // Generate and send verification code
+    const code = user.generatePhoneVerificationCode();
+    await user.save({ validateBeforeSave: false });
+
+    // Send SMS
+    const result = await sendVerificationCode(phone, code);
+
+    res.status(200).json({
+      message: 'Phone number updated. Verification code sent.',
+      phone: user.phone,
+      phoneVerified: false,
+      ...(result.mock && result.code && { code: result.code }),
+    });
+  } catch (error) {
+    console.error('Update phone error:', error);
+    res.status(500).json({ message: error.message || 'Failed to update phone number' });
+  }
+};
+
+// Legacy register endpoint - redirects to step1
+const register = async (req, res) => {
+  return registerStep1(req, res);
+};
+
+module.exports = {
+  register,
+  registerStep1,
+  registerStep2,
+  registerFull,
+  sendPhoneCode,
+  verifyPhone,
+  verifyEmail,
+  resendVerificationEmail,
+  forgotPassword,
+  resetPassword,
+  login,
+  getMe,
+  resendPhoneCode,
+  verifyPhoneAuthenticated,
+  updatePhone,
+};

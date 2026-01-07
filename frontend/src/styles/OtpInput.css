@@ -1,0 +1,68 @@
+/* OTP Input - 6 boxes */
+
+.otp-input-container {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.otp-box {
+  width: 48px;
+  height: 56px;
+  border: 2px solid #e5e5e5;
+  border-radius: 12px;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  background: white;
+  color: var(--text-dark);
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.otp-box:hover:not(:disabled) {
+  border-color: #d0d0d0;
+}
+
+.otp-box:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.12);
+}
+
+/* Filled state */
+.otp-box:not(:placeholder-shown),
+.otp-box:not([value=""]) {
+  border-color: var(--primary-color);
+  background: #fff8f5;
+}
+
+/* Error state */
+.otp-input-container.error .otp-box {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.otp-input-container.error .otp-box:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+/* Disabled state */
+.otp-input-container.disabled .otp-box {
+  background: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Responsive */
+@media (max-width: 400px) {
+  .otp-input-container {
+    gap: 6px;
+  }
+  
+  .otp-box {
+    width: 40px;
+    height: 48px;
+    font-size: 20px;
+    border-radius: 10px;
+  }
+}

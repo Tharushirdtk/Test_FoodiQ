@@ -1,0 +1,293 @@
+/* Custom Dropdown Component Styles */
+
+.dropdown {
+  position: relative;
+  display: inline-flex;
+  min-width: 140px;
+  font-family: inherit;
+  z-index: 50;
+}
+
+/* Size variants */
+.dropdown.sm {
+  min-width: 100px;
+}
+
+.dropdown.md {
+  min-width: 140px;
+}
+
+.dropdown.lg {
+  min-width: 180px;
+}
+
+/* Trigger button */
+.dropdown > .dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-white, #fff);
+  border: 1.5px solid var(--border-color, #E5E5E5);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  gap: 8px;
+}
+
+.dropdown.sm > .dropdown-trigger {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.dropdown.lg > .dropdown-trigger {
+  padding: 12px 16px;
+  font-size: 15px;
+}
+
+.dropdown > .dropdown-trigger:hover {
+  border-color: var(--primary-color, #FF6B00);
+  background: var(--bg-light, #F8F8F8);
+}
+
+.dropdown.open > .dropdown-trigger {
+  border-color: var(--primary-color, #FF6B00);
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+}
+
+.dropdown.disabled > .dropdown-trigger {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--bg-light, #F8F8F8);
+}
+
+.dropdown.disabled > .dropdown-trigger:hover {
+  border-color: var(--border-color, #E5E5E5);
+  background: var(--bg-light, #F8F8F8);
+}
+
+/* Dropdown value text */
+.dropdown .dropdown-value {
+  flex: 1;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dark, #1E1E1E);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown > .dropdown-trigger.placeholder .dropdown-value {
+  color: var(--text-gray, #ADADAD);
+  font-weight: 400;
+}
+
+/* Arrow icon */
+.dropdown .dropdown-arrow {
+  color: var(--text-gray, #ADADAD);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.dropdown .dropdown-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.dropdown.open .dropdown-arrow {
+  color: var(--primary-color, #FF6B00);
+}
+
+/* ============================================
+   DROPDOWN MENU - Rendered via Portal in body
+   These styles target elements OUTSIDE .dropdown
+   ============================================ */
+
+.dropdown-menu {
+  position: fixed;
+  background: var(--bg-white, #fff);
+  border: 1.5px solid var(--border-color, #E5E5E5);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 99999;
+  max-height: 280px;
+  overflow-y: auto;
+  animation: dropdownSlideDown 0.15s ease-out;
+  will-change: transform, opacity;
+  max-width: calc(100vw - 16px);
+}
+
+/* Upward opening dropdown */
+.dropdown-menu.upward {
+  animation: dropdownSlideUp 0.15s ease-out;
+}
+
+@keyframes dropdownSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dropdownSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom scrollbar for dropdown menu */
+.dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: var(--border-color, #E5E5E5);
+  border-radius: 3px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: var(--text-gray, #ADADAD);
+}
+
+/* ============================================
+   DROPDOWN OPTIONS - Direct selectors for portal
+   ============================================ */
+
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  gap: 12px;
+  color: var(--text-dark, #1E1E1E);
+  font-size: 14px;
+}
+
+.dropdown-option:first-child {
+  border-radius: 10px 10px 0 0;
+}
+
+.dropdown-option:last-child {
+  border-radius: 0 0 10px 10px;
+}
+
+.dropdown-option:only-child {
+  border-radius: 10px;
+}
+
+.dropdown-option:hover {
+  background: var(--bg-light, #F8F8F8);
+}
+
+.dropdown-option.selected {
+  background: rgba(255, 107, 53, 0.08);
+  color: var(--primary-color, #FF6B35);
+}
+
+.dropdown-option.selected:hover {
+  background: rgba(255, 107, 53, 0.12);
+}
+
+/* Option label */
+.option-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: inherit;
+}
+
+.dropdown-option.selected .option-label {
+  font-weight: 600;
+}
+
+/* Checkmark icon */
+.option-check {
+  flex-shrink: 0;
+  color: var(--primary-color, #FF6B35);
+}
+
+/* Empty state */
+.dropdown-empty {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-gray, #ADADAD);
+  font-size: 14px;
+}
+
+/* ============================================
+   DARK MODE - for portal elements
+   ============================================ */
+
+:root.dark-mode .dropdown-menu,
+[data-theme="dark"] .dropdown-menu {
+  background: var(--bg-white, #2d2d2d);
+  border-color: var(--border-color, #404040);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+:root.dark-mode .dropdown-option,
+[data-theme="dark"] .dropdown-option {
+  color: var(--text-dark, #f0f0f0);
+}
+
+:root.dark-mode .dropdown-option:hover,
+[data-theme="dark"] .dropdown-option:hover {
+  background: var(--bg-light, #3d3d3d);
+}
+
+:root.dark-mode .dropdown-option.selected,
+[data-theme="dark"] .dropdown-option.selected {
+  background: rgba(255, 107, 53, 0.15);
+}
+
+:root.dark-mode .dropdown-option.selected:hover,
+[data-theme="dark"] .dropdown-option.selected:hover {
+  background: rgba(255, 107, 53, 0.2);
+}
+
+:root.dark-mode .dropdown-empty,
+[data-theme="dark"] .dropdown-empty {
+  color: var(--text-gray, #9ca3af);
+}
+
+/* Focus states for accessibility */
+.dropdown:focus {
+  outline: none;
+}
+
+.dropdown:focus > .dropdown-trigger {
+  border-color: var(--primary-color, #FF6B00);
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .dropdown {
+    min-width: 120px;
+  }
+  
+  .dropdown > .dropdown-trigger {
+    padding: 9px 12px;
+  }
+  
+  .dropdown .dropdown-value {
+    font-size: 13px;
+  }
+}

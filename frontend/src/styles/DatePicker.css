@@ -1,0 +1,461 @@
+/* Custom DatePicker Component Styles */
+
+.custom-datepicker {
+  position: relative;
+  width: 100%;
+}
+
+/* Trigger Button */
+.datepicker-trigger {
+  width: 100%;
+  padding: 12px 16px;
+  padding-right: 44px;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  background: white;
+  font-size: 15px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.datepicker-trigger:hover:not(:disabled) {
+  border-color: #d0d0d0;
+}
+
+.datepicker-trigger:focus {
+  outline: none;
+  border-color: var(--primary-color, #ff6b35);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.datepicker-trigger.active {
+  border-color: var(--primary-color, #ff6b35);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.datepicker-trigger:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.datepicker-trigger .placeholder {
+  color: #9ca3af;
+}
+
+.datepicker-trigger .value {
+  color: var(--text-dark, #1f2937);
+}
+
+.datepicker-trigger .calendar-icon {
+  position: absolute;
+  right: 14px;
+  width: 18px;
+  height: 18px;
+  color: #9ca3af;
+  transition: color 0.2s;
+}
+
+.datepicker-trigger:hover .calendar-icon,
+.datepicker-trigger.active .calendar-icon {
+  color: var(--primary-color, #ff6b35);
+}
+
+/* Dropdown Container */
+.datepicker-dropdown {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  animation: fadeSlideIn 0.2s ease;
+  min-width: 300px;
+}
+
+.datepicker-dropdown-portal {
+  /* Portal-specific styles - ensure it's above modals */
+  pointer-events: auto !important;
+  z-index: 10001 !important;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Header */
+.datepicker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.header-dropdowns {
+  display: flex;
+  gap: 8px;
+}
+
+.month-select,
+.year-select {
+  padding: 8px 32px 8px 14px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat;
+  background-position: right 12px center;
+  color: var(--text-dark, #1f2937);
+  transition: all 0.2s;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.month-select:hover,
+.year-select:hover {
+  border-color: var(--primary-color, #ff6b35);
+}
+
+.month-select:focus,
+.year-select:focus {
+  outline: none;
+  border-color: var(--primary-color, #ff6b35);
+  box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.1);
+}
+
+.month-select {
+  min-width: 110px;
+}
+
+.year-select {
+  min-width: 80px;
+}
+
+/* Navigation Buttons */
+.nav-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover {
+  background: var(--primary-color, #ff6b35);
+  color: white;
+}
+
+.nav-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* React Day Picker Overrides */
+.datepicker-dropdown .rdp {
+  --rdp-cell-size: 36px;
+  --rdp-accent-color: var(--primary-color, #ff6b35);
+  --rdp-background-color: #fff5f2;
+  margin: 0;
+}
+
+.datepicker-dropdown .rdp-months {
+  justify-content: center;
+}
+
+.datepicker-dropdown .rdp-month {
+  width: 100%;
+}
+
+.datepicker-dropdown .rdp-table {
+  width: 100%;
+  max-width: none;
+}
+
+.datepicker-dropdown .rdp-head_cell {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  padding: 8px 0;
+}
+
+.datepicker-dropdown .rdp-cell {
+  padding: 2px;
+}
+
+.datepicker-dropdown .rdp-day {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.datepicker-dropdown .rdp-day:hover:not(.rdp-day_disabled):not(.rdp-day_selected) {
+  background-color: #fff5f2;
+  color: var(--primary-color, #ff6b35);
+}
+
+.datepicker-dropdown .rdp-day_selected {
+  background-color: var(--primary-color, #ff6b35) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.datepicker-dropdown .rdp-day_selected:hover {
+  background-color: #e55a2b !important;
+}
+
+.datepicker-dropdown .rdp-day_today:not(.rdp-day_selected) {
+  font-weight: 700;
+  color: var(--primary-color, #ff6b35);
+  background-color: #fff5f2;
+  border: 2px solid var(--primary-color, #ff6b35);
+}
+
+.datepicker-dropdown .rdp-day_outside {
+  opacity: 0.4;
+}
+
+.datepicker-dropdown .rdp-day_disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+/* Footer Actions */
+.datepicker-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  gap: 12px;
+}
+
+.clear-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #f5f5f5;
+  color: #6b7280;
+}
+
+.clear-btn:hover {
+  background: #e5e5e5;
+  color: #374151;
+}
+
+.ok-btn {
+  padding: 8px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--primary-color, #ff6b35);
+  color: white;
+}
+
+.ok-btn:hover {
+  background: var(--primary-hover, #e55a2b);
+}
+
+/* Responsive */
+@media (max-width: 400px) {
+  .datepicker-dropdown {
+    min-width: 280px;
+    padding: 12px;
+  }
+  
+  .datepicker-dropdown .rdp {
+    --rdp-cell-size: 32px;
+  }
+  
+  .datepicker-dropdown .rdp-day {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+  
+  .month-select,
+  .year-select {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  
+  .month-select {
+    min-width: 90px;
+  }
+}
+
+/* ==================== DARK MODE ==================== */
+:root.dark-mode .datepicker-trigger,
+[data-theme="dark"] .datepicker-trigger {
+  background: var(--bg-white, #2d2d2d);
+  border-color: var(--border-color, #404040);
+  color: var(--text-dark, #f0f0f0);
+}
+
+:root.dark-mode .datepicker-trigger:hover:not(:disabled),
+[data-theme="dark"] .datepicker-trigger:hover:not(:disabled) {
+  border-color: #505050;
+}
+
+:root.dark-mode .datepicker-trigger:disabled,
+[data-theme="dark"] .datepicker-trigger:disabled {
+  background-color: #1a1a1a;
+}
+
+:root.dark-mode .datepicker-trigger .placeholder,
+[data-theme="dark"] .datepicker-trigger .placeholder {
+  color: #6b7280;
+}
+
+:root.dark-mode .datepicker-trigger .value,
+[data-theme="dark"] .datepicker-trigger .value {
+  color: #f0f0f0;
+}
+
+:root.dark-mode .datepicker-trigger .calendar-icon,
+[data-theme="dark"] .datepicker-trigger .calendar-icon {
+  color: #6b7280;
+}
+
+/* Dropdown Dark Mode */
+:root.dark-mode .datepicker-dropdown,
+[data-theme="dark"] .datepicker-dropdown {
+  background: #2d2d2d;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+:root.dark-mode .datepicker-header,
+[data-theme="dark"] .datepicker-header {
+  border-bottom-color: #404040;
+}
+
+:root.dark-mode .month-select,
+:root.dark-mode .year-select,
+[data-theme="dark"] .month-select,
+[data-theme="dark"] .year-select {
+  background: #1a1a1a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat;
+  background-position: right 12px center;
+  border-color: #404040;
+  color: #f0f0f0;
+}
+
+:root.dark-mode .month-select:hover,
+:root.dark-mode .year-select:hover,
+[data-theme="dark"] .month-select:hover,
+[data-theme="dark"] .year-select:hover {
+  border-color: var(--primary-color, #ff6b35);
+}
+
+:root.dark-mode .month-select option,
+:root.dark-mode .year-select option,
+[data-theme="dark"] .month-select option,
+[data-theme="dark"] .year-select option {
+  background: #2d2d2d;
+  color: #f0f0f0;
+}
+
+/* Nav Buttons Dark Mode */
+:root.dark-mode .nav-btn,
+[data-theme="dark"] .nav-btn {
+  background: #404040;
+  color: #f0f0f0;
+}
+
+:root.dark-mode .nav-btn:hover,
+[data-theme="dark"] .nav-btn:hover {
+  background: var(--primary-color, #ff6b35);
+  color: white;
+}
+
+/* Calendar Days Dark Mode */
+:root.dark-mode .datepicker-dropdown .rdp,
+[data-theme="dark"] .datepicker-dropdown .rdp {
+  --rdp-background-color: rgba(255, 107, 53, 0.15);
+}
+
+:root.dark-mode .datepicker-dropdown .rdp-head_cell,
+[data-theme="dark"] .datepicker-dropdown .rdp-head_cell {
+  color: #6b7280;
+}
+
+:root.dark-mode .datepicker-dropdown .rdp-day,
+[data-theme="dark"] .datepicker-dropdown .rdp-day {
+  color: #f0f0f0;
+}
+
+:root.dark-mode .datepicker-dropdown .rdp-day:hover:not(.rdp-day_disabled):not(.rdp-day_selected),
+[data-theme="dark"] .datepicker-dropdown .rdp-day:hover:not(.rdp-day_disabled):not(.rdp-day_selected) {
+  background-color: rgba(255, 107, 53, 0.15);
+  color: var(--primary-color, #ff6b35);
+}
+
+:root.dark-mode .datepicker-dropdown .rdp-day_today:not(.rdp-day_selected),
+[data-theme="dark"] .datepicker-dropdown .rdp-day_today:not(.rdp-day_selected) {
+  background-color: rgba(255, 107, 53, 0.15);
+  border-color: var(--primary-color, #ff6b35);
+}
+
+:root.dark-mode .datepicker-dropdown .rdp-day_outside,
+[data-theme="dark"] .datepicker-dropdown .rdp-day_outside {
+  color: #6b7280;
+}
+
+/* Footer Dark Mode */
+:root.dark-mode .datepicker-footer,
+[data-theme="dark"] .datepicker-footer {
+  border-top-color: #404040;
+}
+
+:root.dark-mode .clear-btn,
+[data-theme="dark"] .clear-btn {
+  background: #404040;
+  color: #9ca3af;
+}
+
+:root.dark-mode .clear-btn:hover,
+[data-theme="dark"] .clear-btn:hover {
+  background: #505050;
+  color: #f0f0f0;
+}
+
+:root.dark-mode .ok-btn,
+[data-theme="dark"] .ok-btn {
+  background: var(--primary-color, #ff6b35);
+  color: white;
+}
+
+:root.dark-mode .ok-btn:hover,
+[data-theme="dark"] .ok-btn:hover {
+  background: var(--primary-hover, #e55a2b);
+}
+

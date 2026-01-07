@@ -1,0 +1,585 @@
+.homepage {
+  min-height: 100vh;
+  background-color: var(--bg-light);
+  padding-bottom: 80px;
+}
+
+.homepage-content {
+  /* Content wrapper */
+}
+
+/* Header */
+.header {
+  background: var(--bg-header);
+  padding: 16px;
+  position: sticky;
+  top: 2px;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Match vertical spacing on other main pages: add a bit more top padding on homepage header */
+.homepage .header {
+  padding-top: 20px;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+/* Homepage: center the logo while keeping right-side icons intact */
+.homepage .header-top {
+  position: relative;
+  justify-content: flex-end; /* push icons to the right; logo will be absolutely centered */
+  margin-bottom: 22px; /* further reduced margin for header-top */
+}
+.homepage .header-logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-logo {
+  flex: 1;
+  margin-bottom: 4px; /* Reduced margin for search-bar-home */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-logo-img {
+  height: 52px;
+  width: 52px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--primary-color);
+}
+
+.header-location {
+  flex: 1;
+  margin: 0 16px;
+}
+
+.header-location .label {
+  font-size: 12px;
+  color: var(--text-gray);
+  margin-bottom: 4px;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.cart-btn {
+  position: relative;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--primary-color);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.search-bar-home {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-light);
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 2px; /* further reduced gap under search */
+}
+
+.search-bar-home input {
+  flex: 1;
+  border: none;
+  background: none;
+  font-size: 14px;
+  outline: none;
+}
+
+/* Hero Banner */
+.hero-banner {
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), 
+              url('https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=1200&h=600&fit=crop') center/cover;
+  color: white;
+  padding: 24px;
+  margin: 16px;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  min-height: 350px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.hero-image {
+  display: none;
+}
+
+.hero-text h1 {
+  font-size: 36px;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.hero-text p {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 16px;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #fff;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.hero-actions .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Categories */
+.categories {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  align-items: center;
+}
+
+.categories::-webkit-scrollbar {
+  display: none;
+}
+
+.categories-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: var(--text-gray);
+  flex-shrink: 0;
+}
+
+.category-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 20px;
+  background: var(--bg-white);
+  color: var(--text-dark);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.category-btn.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* Section */
+.section {
+  padding: 16px;
+  margin: 0 16px 16px;
+  background: var(--bg-white);
+  border-radius: 16px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section h2 {
+  font-size: 20px;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Food Grid */
+.food-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.food-card {
+  background: var(--bg-white);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* Make cards use column flex so content can stretch and footers align */
+.food-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.food-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.discount-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--primary-color);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 1;
+}
+
+.badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #4CAF50;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 1;
+}
+
+.food-image {
+  height: 200px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+/* Ensure image doesn't shrink when card grows */
+.food-image {
+  flex: 0 0 200px;
+}
+
+.food-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.food-card:hover .food-image img {
+  transform: scale(1.05);
+}
+
+.food-info {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+.food-info h3 {
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: var(--text-dark);
+}
+
+.food-info p {
+  font-size: 13px;
+  color: var(--text-gray);
+  margin-bottom: 12px;
+}
+
+.food-meta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.rating, .time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-gray);
+}
+
+.food-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto; /* push footer to bottom of card */
+}
+
+.price {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+/* Signature List */
+.signature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.signature-item {
+  background: var(--bg-white);
+  padding: 16px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.signature-item:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.signature-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--bg-light);
+  flex-shrink: 0;
+}
+
+.signature-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.signature-info {
+  flex: 1;
+}
+
+.signature-info h4 {
+  font-size: 17px;
+  margin-bottom: 6px;
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-white);
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 8px 16px;
+  border-radius: 12px;
+}
+
+.nav-item.active {
+  background: rgba(255, 107, 53, 0.1);
+}
+
+.nav-icon {
+  font-size: 20px;
+}
+
+.nav-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-gray);
+}
+
+.nav-item.active .nav-label {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .food-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero-banner {
+    margin: 12px;
+    padding: 20px;
+  }
+  
+  .hero-image {
+    font-size: 48px;
+  }
+}
+
+/* Search Clear Button */
+.search-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-gray);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-clear:hover {
+  color: var(--text-dark);
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 16px;
+  color: var(--text-gray);
+}
+
+/* Section Loading - for inline loading within sections */
+.section-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 12px;
+  color: var(--text-gray);
+  background: var(--bg-white);
+  border-radius: 12px;
+  margin: 0 16px;
+}
+
+.section-loading p {
+  font-size: 14px;
+  margin: 0;
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+  color: var(--primary-color);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 16px;
+  color: var(--text-gray);
+  padding: 40px;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 16px;
+}
+
+.page-info {
+  font-size: 14px;
+  color: var(--text-gray);
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 14px;
+}

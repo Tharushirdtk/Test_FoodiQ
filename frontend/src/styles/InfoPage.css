@@ -1,0 +1,153 @@
+/* InfoPage.css - Shared styles for Privacy Policy, Terms, etc. */
+
+.info-page {
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  padding-bottom: 80px;
+}
+
+.info-header {
+  background: var(--bg-white);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.info-header .back-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-dark);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.info-header .back-btn:hover {
+  background-color: var(--bg-light);
+}
+
+.info-header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.info-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+.info-section {
+  background: var(--bg-white);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.info-section h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.info-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 20px 0 12px 0;
+}
+
+.info-section p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-gray);
+  margin: 0 0 12px 0;
+}
+
+.info-section ul {
+  margin: 0 0 12px 0;
+  padding-left: 20px;
+}
+
+.info-section li {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-gray);
+  margin-bottom: 8px;
+}
+
+.info-section strong {
+  color: var(--text-dark);
+}
+
+.info-section a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.info-section a:hover {
+  text-decoration: underline;
+}
+
+.last-updated {
+  font-size: 13px;
+  color: var(--text-light);
+  text-align: center;
+  margin-top: 24px;
+}
+
+/* Bottom Navigation for all pages */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-white);
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 0;
+  border-top: 1px solid var(--border-color);
+  z-index: 1000;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-gray);
+  padding: 4px 12px;
+  transition: color 0.2s;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  color: var(--primary-color);
+}
+
+.nav-icon {
+  font-size: 20px;
+}
+
+.nav-label {
+  font-size: 12px;
+  font-weight: 500;
+}

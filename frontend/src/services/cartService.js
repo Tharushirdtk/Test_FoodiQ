@@ -2,13 +2,21 @@ import api from '../utils/apiClient';
 
 const cartService = {
   getCart: async () => {
+    // Debug: log token sources before request
+    try {
+      // eslint-disable-next-line no-console
+      console.debug('[cartService] getCart', 'localToken=', localStorage.getItem('token'), 'sessionToken=', sessionStorage.getItem('token'));
+    } catch (e) {}
     const res = await api.get('/cart');
     return res.data;
   },
 
-  addToCart: async (productId, quantity = 1, options = {}) => {
+  addToCart: async (productId, quantity = 1, options = {}, selectedAttributes = []) => {
     // options can include: extras, size, spiceLevel, instructions
-    const res = await api.post('/cart', { productId, quantity, options });
+    // selectedAttributes may be passed at root for compatibility with socket payloads
+    const payload = { productId, quantity, options };
+    if (Array.isArray(selectedAttributes) && selectedAttributes.length > 0) payload.selectedAttributes = selectedAttributes;
+    const res = await api.post('/cart', payload);
     return res.data;
   },
 

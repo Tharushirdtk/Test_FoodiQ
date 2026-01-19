@@ -39,8 +39,12 @@
   font-size: 20px;
   font-weight: 600;
   color: var(--text-dark);
-  margin: 0;
+  margin: 0 12px;
   flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sub-header .header-action {
@@ -103,6 +107,22 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+}
+
+/* Notifications page: center empty-state vertically in viewport */
+.notifications-page .empty-state {
+  min-height: calc(100vh - 180px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 40px 0;
+}
+
+.notifications-page .empty-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+  color: var(--primary-color);
 }
 
 .card-list {
@@ -264,8 +284,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  padding: 20px;
+  z-index: 2000;
+  /* remove vertical padding so modal can sit flush and header/footer centering is easier to verify */
+  padding: 0 20px;
 }
 
 .modal-content {
@@ -274,7 +295,9 @@
   width: 100%;
   max-width: 700px;
   max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .modal-header {
@@ -284,6 +307,7 @@
   justify-content: space-between;
   align-items: center;
   position: relative;
+  flex-shrink: 0;
 }
 
 .modal-header h2 {
@@ -311,6 +335,19 @@
 
 .modal-body {
   padding: 20px;
+  /* make body scrollable while header/footer stay fixed */
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .form-group {
@@ -561,12 +598,12 @@
 
 .notification-icon.system {
   background: rgba(33, 150, 243, 0.1);
-  color: #2196F3;
+  color: var(--primary-color);
 }
 
 .notification-icon.info {
   background: rgba(156, 39, 176, 0.1);
-  color: #9C27B0;
+  color: var(--primary-color);
 }
 
 .notification-content {

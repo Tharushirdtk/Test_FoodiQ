@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import productService from '../services/productService';
 import { FiArrowLeft, FiTrash2 } from 'react-icons/fi';
 import favoritesService from '../services/favoritesService';
 import { useCart } from '../context/CartContext';
@@ -39,14 +40,36 @@ const FavoritesPage = () => {
     }
   };
 
-  const handleAddToCart = (product) => {
-    addToCart({
-      id: product._id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      quantity: 1
-    });
+  const handleAddToCart = async (product) => {
+    try {
+      const data = await productService.getProduct(product._id || product.id);
+      const full = data?.product || data || product;
+      const attrs = [];
+      const ags = Array.isArray(full.attributeGroups) ? full.attributeGroups : [];
+      for (const g of ags) {
+        const groupKey = g.key || g.title || '';
+        if (g.type === 'single-select') {
+          const def = (g.attributes || []).find(a => a.defaultSelected);
+          if (def) attrs.push({ groupKey, id: def._id || def.id, name: def.name, priceType: def.priceType || 'flat', amount: def.amount || 0, quantity: 1 });
+        } else if (g.type === 'multi-select') {
+          for (const a of (g.attributes || [])) {
+            if (a && a.defaultSelected) attrs.push({ groupKey, id: a._id || a.id, name: a.name, priceType: a.priceType || 'flat', amount: a.amount || 0, quantity: a.quantityEnabled ? (a.defaultQuantity || 1) : 1 });
+          }
+        }
+      }
+
+      addToCart({
+        id: full._id || full.id || product._id,
+        name: full.name || product.name,
+        price: Number(full.price || product.price) || 0,
+        image: full.image || product.image,
+        quantity: 1,
+        selectedAttributes: attrs
+      });
+    } catch (e) {
+      // fallback to simple add
+      addToCart({ id: product._id, name: product.name, price: product.price, image: product.image, quantity: 1 });
+    }
   };
 
   return (

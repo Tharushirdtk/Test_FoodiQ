@@ -1,0 +1,48 @@
+/* Styles specific to VendorModal component. Keep class names unique to avoid global collisions. */
+/* Vendor modal: use verification-warning style for rate-note CTA */
+.verification-warning {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: var(--bg-warning, #fef3c7);
+  border: 1px solid var(--warning-color, #f59e0b);
+  border-radius: 12px;
+  margin-top: 16px;
+}
+
+.warning-content {
+  flex: 1;
+}
+
+.warning-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--warning-color, #92400e);
+  margin: 0 0 4px;
+}
+
+.warning-text {
+  font-size: 13px;
+  color: var(--warning-color, #b45309);
+  margin: 0;
+}
+
+.verify-now-btn {
+  background: var(--primary-color);
+  color: var(--text-on-primary, white);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.verify-now-btn:hover {
+  background: var(--primary-dark, #e55a25);
+  color: var(--text-on-primary, white);
+}
+
+.vendor-rate-cta { margin-left: 8px; }

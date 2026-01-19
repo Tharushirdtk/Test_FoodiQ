@@ -1,0 +1,89 @@
+.cp-currency-field {
+  margin-bottom: 12px;
+}
+.cp-currency-label {
+  display: block;
+  font-size: 14px;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.cp-currency-input-group {
+  display: flex;
+  align-items: center;
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.cp-currency-input-group:focus-within {
+  border-color: var(--primary-color);
+}
+.cp-currency-prefix {
+  padding: 12px 14px;
+  color: var(--text-gray);
+  background: var(--bg-white);
+  border-right: 1px solid var(--border-color);
+  font-weight: 600;
+  transition: border-color 0.16s, color 0.16s;
+}
+
+/* Disabled state */
+.cp-currency-input-group.disabled {
+  opacity: 0.7;
+  background: var(--bg-light, #f5f5f5);
+  cursor: not-allowed;
+}
+.cp-currency-input-group.disabled .cp-currency-prefix {
+  color: var(--text-gray, #9ca3af);
+  border-right-color: var(--border-color);
+}
+
+/* When the field is focused, tint the separator to match the group border */
+.cp-currency-input-group:focus-within .cp-currency-prefix {
+  border-right-color: var(--primary-color);
+  color: var(--primary-color);
+}
+.cp-currency-input {
+  border: none;
+  outline: none;
+  padding: 12px 14px;
+  font-size: 15px;
+  color: var(--text-dark);
+  background: transparent;
+  flex: 1 1 auto;
+}
+
+.cp-currency-input:disabled {
+  background: transparent;
+  color: var(--text-light, #9ca3af);
+  cursor: not-allowed;
+}
+
+/* ensure prefix also looks disabled */
+.cp-currency-input-group.disabled .cp-currency-prefix,
+.cp-currency-input-group.disabled .cp-currency-input {
+  color: var(--text-light, #9ca3af);
+}
+
+/* Override the more specific `.form-group input` rule so there is no nested border */
+.form-group .cp-currency-input {
+  border: none;
+  background: transparent;
+}
+.cp-currency-input::-webkit-outer-spin-button,
+.cp-currency-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Ensure no box-shadow is applied to inner input (override global focus shadows) */
+.cp-currency-input:focus,
+.form-group .cp-currency-input:focus {
+  box-shadow: none !important;
+}
+
+/* Also remove outline styles that might show a second ring */
+.cp-currency-input:focus-visible {
+  outline: none;
+}

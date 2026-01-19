@@ -1,0 +1,97 @@
+/* Scoped Add Contact panel styles to avoid accidental overrides */
+.account-page .add-contact-panel{
+  background: var(--card-bg, #ffffff);
+  padding: 14px;
+  border-radius: 12px;
+  margin-top: 12px;
+  box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+  border: 1px solid rgba(16,24,40,0.06);
+  width: 100%;
+}
+
+.account-page .add-contact-panel .contact-form-row{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+
+.account-page .add-contact-panel .contact-label-dropdown{
+  min-width:120px;
+}
+
+.account-page .add-contact-panel .contact-phone-input{
+  flex:1;
+}
+
+.account-page .add-contact-panel .add-contact-phone .react-phone-number-input__input{
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid var(--border-color, #e6e6e6);
+  background: var(--bg-card, #fff);
+  height:40px;
+  box-sizing:border-box;
+}
+
+.account-page .add-contact-panel .add-contact-phone .react-phone-number-input__input:focus,
+.account-page .add-contact-panel .add-contact-phone .react-phone-number-input__input:focus-visible {
+  outline: none !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.12) !important;
+}
+
+/* country button focus */
+.account-page .add-contact-panel .add-contact-phone .react-phone-number-input__country:focus,
+.account-page .add-contact-panel .add-contact-phone .react-phone-number-input__country:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.12) !important;
+  border-radius: 6px;
+}
+
+.account-page .add-contact-panel .add-contact-phone .react-phone-number-input__country{
+  margin-right:6px;
+}
+
+.account-page .add-contact-panel .contact-form-actions{
+  margin-top:12px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.account-page .add-contact-panel .btn-small{
+  padding:10px 14px;
+  font-weight:600;
+}
+
+.account-page .add-contact-panel .btn-small.btn-secondary{
+  background: var(--bg-card, #fff);
+  border:1px solid var(--border-color, #e6e6e6);
+  color: var(--text-dark);
+}
+
+/* Dark-mode overrides: make secondary (Cancel) button and phone input text readable */
+:root.dark-mode .account-page .add-contact-panel .btn-small.btn-secondary{
+  color: #fff !important;
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+:root.dark-mode .account-page .add-contact-panel .add-contact-phone .react-phone-number-input__input{
+  color: #fff !important;
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+.account-page .add-contact-panel .phone-error, .account-page .add-contact-panel .phone-success{
+  margin-top:8px;
+  color: var(--danger-color, #d32f2f);
+}
+
+/* Make sure dropdown and inputs align on small screens */
+@media (max-width: 640px) {
+  .account-page .add-contact-panel .contact-form-row{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .account-page .add-contact-panel .contact-label-dropdown{ width:100%; }
+}

@@ -219,7 +219,7 @@ const DEFAULT_COUNTRIES = [
   "Zimbabwe"
 ];
 
-const CountrySelect = ({ value, onChange, className = "", countries }) => {
+const CountrySelect = ({ value, onChange, className = "", countries, disabled = false }) => {
   const list = Array.isArray(countries) && countries.length ? countries : DEFAULT_COUNTRIES;
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -242,13 +242,15 @@ const CountrySelect = ({ value, onChange, className = "", countries }) => {
   };
 
   return (
-    <div className={`country-dropdown ${className}`} ref={ref}>
+    <div className={`country-dropdown ${className} ${disabled ? 'disabled' : ''}`} ref={ref}>
       <button
         type="button"
-        className={`country-trigger ${open ? "open" : ""}`}
-        onClick={() => setOpen((s) => !s)}
+        className={`country-trigger ${open ? "open" : ""} ${disabled ? 'disabled' : ''}`}
+        onClick={() => { if (disabled) return; setOpen((s) => !s); }}
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-disabled={disabled}
+        disabled={disabled}
       >
         <span className={`country-value ${value ? "has" : ""}`}>{value || "Select country"}</span>
         <svg className="chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
@@ -256,7 +258,7 @@ const CountrySelect = ({ value, onChange, className = "", countries }) => {
         </svg>
       </button>
 
-      {open && (
+      {open && !disabled && (
         <div className="country-list" role="listbox">
           <div className="country-search">
             <input

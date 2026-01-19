@@ -1,0 +1,125 @@
+/* Scoped styles for the Orders Export controls in Admin Dashboard */
+
+.admin-export-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 10px;
+  border: 1px solid #e5e5e5;
+}
+
+.export-dates {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.export-dates .custom-datepicker {
+  flex: 1;
+  min-width: 140px;
+}
+
+.export-controls-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.export-chart-select {
+  min-width: 200px;
+  flex: 0 0 auto;
+}
+
+.export-vendor {
+  min-width: 220px;
+  flex: 0 0 auto;
+}
+
+.export-btn {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.2);
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.export-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.export-btn:active {
+  transform: translateY(0);
+}
+
+/* When vendor filter is present, ensure proper spacing */
+.admin-export-wrapper.has-vendor-filter .export-controls-row {
+  justify-content: flex-start;
+}
+
+/* Responsive behavior */
+@media (max-width: 1200px) {
+  .export-controls-row {
+    flex-wrap: wrap;
+  }
+
+  .export-btn {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .export-dates {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .export-dates .custom-datepicker {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .export-controls-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .export-chart-select,
+  .export-vendor {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .export-btn {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-export-wrapper {
+    padding: 12px;
+  }
+
+  .export-dates,
+  .export-controls-row {
+    gap: 8px;
+  }
+}
+
+/* Accordion visuals are handled in AdminDashboard.css to provide animated open/close styles */
+.admin-accordion {
+  overflow: visible;
+}

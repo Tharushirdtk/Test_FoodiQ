@@ -1,0 +1,85 @@
+.star-rating {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.star-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.star-btn svg {
+  color: #cfcfcf;
+  transition: color 0.12s ease, transform 0.12s ease;
+}
+
+.star-btn.active svg {
+  color: #f1c40f; /* gold */
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.12));
+}
+
+.star-btn.interactive:hover svg {
+  color: #f7d566;
+  transform: scale(1.04);
+}
+
+.star-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(241,196,15,0.12);
+}
+
+/* Header star button variant */
+.star-header-btn {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.star-header-btn svg { color: #6f6f6f; }
+.star-header-btn.active svg { color: #f1c40f; }
+.star-header-btn {
+  background: rgba(0,0,0,0.03);
+  border-radius: 50%;
+  padding: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.08s ease;
+}
+.star-header-btn:hover { background: rgba(0,0,0,0.06); transform: translateY(-1px); }
+.star-header-btn.active {
+  background: rgba(241,196,15,0.16);
+}
+
+/* Modal tweaks for product rating */
+.modal-content.product-modal {
+  max-width: 560px;
+  border-radius: 12px;
+  padding: 18px;
+}
+.modal-header h3 { margin: 0; font-weight: 600; }
+.modal-body { padding-top: 12px; }
+.review-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 74px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6e6e6;
+  margin-top: 10px;
+}
+.modal-footer { display:flex; gap:12px; justify-content:flex-end; padding-top:14px; }

@@ -10,9 +10,9 @@
   width: 100%;
   padding: 12px 16px;
   padding-right: 44px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-color, #e5e5e5);
   border-radius: 12px;
-  background: white;
+  background: var(--bg-card, #fff);
   font-size: 15px;
   font-family: inherit;
   text-align: left;
@@ -69,7 +69,7 @@
 
 /* Dropdown Container */
 .datepicker-dropdown {
-  background: white;
+  background: var(--bg-card, #fff);
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   padding: 16px;
@@ -112,12 +112,12 @@
 .month-select,
 .year-select {
   padding: 8px 32px 8px 14px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-color, #e5e5e5);
   border-radius: 8px;
   font-size: 14px;
   font-family: inherit;
   cursor: pointer;
-  background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat;
+  background: var(--bg-card, #fff) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat;
   background-position: right 12px center;
   color: var(--text-dark, #1f2937);
   transition: all 0.2s;
@@ -151,7 +151,7 @@
   width: 32px;
   height: 32px;
   border: none;
-  background: #f5f5f5;
+  background: var(--bg-light, #f5f5f5);
   border-radius: 8px;
   cursor: pointer;
   display: flex;
@@ -174,7 +174,7 @@
 .datepicker-dropdown .rdp {
   --rdp-cell-size: 36px;
   --rdp-accent-color: var(--primary-color, #ff6b35);
-  --rdp-background-color: #fff5f2;
+  --rdp-background-color: var(--bg-light, #fff5f2);
   margin: 0;
 }
 

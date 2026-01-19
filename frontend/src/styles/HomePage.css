@@ -140,6 +140,7 @@
   gap: 12px;
   margin-bottom: 20px;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  align-items: flex-start; /* allow children (hero-text) to shrink to content */
 }
 
 .hero-image {
@@ -172,7 +173,96 @@
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 4px;
+  color: var(--primary-color);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.35);
+}
+
+/* Contrast panel for hero stats to ensure readability on variable images */
+.homepage .hero-stats {
+  /* Use a darker translucent panel so numbers remain readable on bright images */
+  background: rgba(0, 0, 0, 0.56);
+  padding: 10px 14px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  align-self: flex-start;
+  color: #fff; /* defaults for labels */
+}
+
+/* Card & signature price pills to ensure visibility regardless of image */
+.homepage .food-footer .price-pill {
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--primary-color);
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* Signature list should show plain price text (no pill) */
+.homepage .signature-info .price {
+  background: none;
+  color: var(--primary-color);
+  padding: 0;
+  border-radius: 0;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+/* Rating color inside cards */
+.homepage .rating {
+  color: var(--primary-color);
+}
+
+/* Small tweak to ensure the hero stat labels remain readable */
+.homepage .stat-label {
+  color: rgba(255,255,255,0.95);
+}
+
+/* Force the stat values to use primary color even if other rules conflict */
+.homepage .hero-banner .hero-stats .stat-value,
+.homepage .hero-banner .hero-stats .stat-value * {
+  color: var(--primary-color) !important;
+}
+
+/* Title & description contrast panel to keep text readable on any hero image */
+.homepage .hero-text {
+  background: rgba(0, 0, 0, 0.52);
+  display: inline-block; /* shrink-to-fit */
+  padding: 14px 18px;
+  border-radius: 12px;
+  width: auto;
+  max-width: 90%; /* allow wrapping on small screens */
+  white-space: normal;
+}
+
+.homepage .hero-text h1,
+.homepage .hero-text p {
   color: #fff;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .homepage .hero-stats {
+    background: rgba(0,0,0,0.64);
+    color: #fff;
+  }
+
+  .homepage .food-footer .price-pill {
+    background: rgba(0,0,0,0.6);
+    color: var(--primary-color);
+    box-shadow: none;
+  }
+
+  .homepage .signature-info .price {
+    background: none;
+    color: var(--primary-color);
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .homepage .stat-value {
+    text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+  }
 }
 
 .stat-label {
@@ -200,10 +290,28 @@
   overflow-x: auto;
   scrollbar-width: none;
   align-items: center;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+  z-index: 20;
 }
 
 .categories::-webkit-scrollbar {
-  display: none;
+  height: 10px;
+}
+
+.categories::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.categories::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
+  border-radius: 8px;
+}
+
+/* Prefer visible scrollbar on small screens so users know they can scroll */
+@media(min-width: 769px) {
+  .categories::-webkit-scrollbar { display: none; }
 }
 
 .categories-icon {
@@ -227,11 +335,19 @@
   white-space: nowrap;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex: 0 0 auto;
 }
 
 .category-btn.active {
   background: var(--primary-color);
   color: white;
+}
+
+/* Ensure small visible scrollbar on mobile so users notice horizontal scroll */
+@media (max-width: 768px) {
+  .categories { scrollbar-width: thin; }
+  .categories::-webkit-scrollbar { height: 8px; }
+  .categories::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.16); border-radius: 8px; }
 }
 
 /* Section */
@@ -241,6 +357,31 @@
   background: var(--bg-white);
   border-radius: 16px;
 }
+
+/* Compact section variant for empty states to avoid large blank areas */
+.section.compact-section {
+  padding: 12px 16px;
+  margin: 0 16px 8px;
+  min-height: auto;
+  display: block;
+}
+
+/* When section is compact, make empty-state take minimal vertical space and reduce gap between text and button */
+.section.compact-section .empty-state {
+  min-height: 0;
+  padding: 12px 8px;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+.section.compact-section .empty-state p {
+  margin: 0 0 8px 0;
+}
+.section.compact-section .empty-state .btn {
+  padding: 8px 16px;
+}
+/* Add a little breathing room beneath the button in compact empty state */
+.section.compact-section .empty-state .btn { margin-bottom: 20px; }
 
 .section-header {
   display: flex;
@@ -563,6 +704,17 @@
   gap: 16px;
   color: var(--text-gray);
   padding: 40px;
+}
+
+/* Compact empty state for sections when there are no filters and no data */
+.empty-state.compact {
+  min-height: 0;
+  padding: 12px 8px;
+  gap: 8px;
+  color: var(--text-gray);
+  font-size: 13px;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Pagination */

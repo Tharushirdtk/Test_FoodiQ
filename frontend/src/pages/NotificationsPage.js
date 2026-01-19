@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiBell, FiPackage, FiTag, FiInfo, FiSettings, FiTrash2, FiCheck } from 'react-icons/fi';
 import { useNotifications } from '../context/NotificationsContext';
+import { useAuth } from '../context/AuthContext';
 import QuickNavSidebar from '../components/QuickNavSidebar';
 import { useToast } from '../context/ToastContext';
 import '../styles/SubPage.css';
@@ -10,6 +11,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 const NotificationsPage = () => {
   const navigate = useNavigate();
   const { notifications, loading, markRead, markAllRead, deleteNotification, unreadCount } = useNotifications();
+  const { role } = useAuth();
   const [error, setError] = useState(null);
   const toast = useToast();
   const [deletingIds, setDeletingIds] = useState([]);
@@ -40,14 +42,6 @@ const NotificationsPage = () => {
     return date.toLocaleDateString();
   };
 
-  const handleMarkRead = async (id) => {
-    try {
-      await markRead(id);
-      setError(null);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const handleMarkAllRead = async () => {
     try {
@@ -71,6 +65,109 @@ const NotificationsPage = () => {
       toast && toast.showToast && toast.showToast('Delete failed', { type: 'error', duration: 4000 });
     } finally {
       setDeletingIds(prev => prev.filter(i => i !== id));
+    }
+  };
+
+  const handleItemClick = async (n) => {
+    try {
+      const convId = n?.data?.conversationId || (n?.data && n.data.conversation && n.data.conversation._id) || null;
+      const orderRef = n?.data?.orderId || n?.data?.order || (n?.data && n.data.order && n.data.order._id) || null;
+      const noteType = n?.data?.type || (orderRef ? 'order' : (convId ? 'support' : undefined));
+
+      const oid = orderRef || (n?.data && n.data.order && n.data.order._id) || null;
+      const orderStatusTypes = new Set([
+        'order_placed','order_confirmed','preparing_your_meal','ready_for_pickup','driver_assigned','out_for_delivery','order_picked_up','delivered','cancelled',
+        'vendor_preparing','vendor_ready','vendor_picked',
+        'order_cancelled','order_unassigned'
+      ]);
+
+      if (oid && noteType && orderStatusTypes.has(noteType)) {
+        if (!n.read) await markRead(n._id);
+        if (oid) navigate(`/order/${oid}`);
+        return;
+      }
+
+      if (noteType === 'order' || orderRef) {
+        if (!n.read) await markRead(n._id);
+        if (oid) {
+          const path = convId ? `/order/${oid}/chat?conversationId=${convId}` : `/order/${oid}/chat`;
+          navigate(path);
+        } else if (convId) {
+          navigate(`/support/chat/${convId}`);
+        }
+        return;
+      }
+
+      if (noteType === 'support' || convId) {
+        if (!n.read) await markRead(n._id);
+        if (role === 'support' || role === 'admin') navigate(`/support/chat/${convId}`);
+        else navigate('/support/chat');
+        return;
+      }
+
+      if (n?.data?.type && (n.data.type === 'rate_vendor' || n.data.type === 'vendor_ready') && (n.data.vendor || n.data.vendorId)) {
+        const vendorId = n.data.vendor || n.data.vendorId;
+        const orderId = n?.data?.orderId;
+        if (!n.read) await markRead(n._id);
+        if (orderId) navigate(`/order/${orderId}?openVendor=${vendorId}`);
+        else if (n.data.path) navigate(n.data.path);
+        return;
+      }
+
+      if (n?.data?.type === 'rate_driver' && n?.data?.driver) {
+        const orderId = n?.data?.orderId;
+        const driverId = n.data.driver;
+        if (!n.read) await markRead(n._id);
+        if (orderId) navigate(`/order/${orderId}?openDriver=${driverId}`);
+        else if (n.data.path) navigate(n.data.path);
+        return;
+      }
+
+      if (n?.data?.type === 'rate_product' && (n?.data?.product || n?.data?.productId)) {
+        const pid = n.data.product || n.data.productId;
+        const orderId = n?.data?.orderId;
+        if (!n.read) await markRead(n._id);
+        let path = `/product/${pid}`;
+        if (orderId) path += `?orderId=${orderId}&openRate=1`;
+        else path += `?openRate=1`;
+        navigate(path);
+        return;
+      }
+
+      if (n?.data?.type === 'vendor_rate_driver' && n?.data?.driver) {
+        const orderId = n?.data?.orderId;
+        const driverId = n.data.driver;
+        if (!n.read) await markRead(n._id);
+        if (orderId) navigate(`/order/${orderId}?openDriver=${driverId}`);
+        else if (n.data.path) navigate(n.data.path);
+        return;
+      }
+
+      if (n?.data?.type === 'driver_rate_vendors' && Array.isArray(n?.data?.vendors) && n.data.vendors.length > 0) {
+        const orderId = n?.data?.orderId;
+        const vendorId = n.data.vendors[0];
+        if (!n.read) await markRead(n._id);
+        if (orderId) navigate(`/order/${orderId}?openVendor=${vendorId}`);
+        else if (n.data.path) navigate(n.data.path);
+        return;
+      }
+
+      const orderId = n?.data?.orderId || (n?.data?.order && n.data.order._id) || null;
+      if (orderId) {
+        if (!n.read) await markRead(n._id);
+        navigate(`/order/${orderId}`);
+        return;
+      }
+
+      if (n?.data?.path) {
+        if (!n.read) await markRead(n._id);
+        navigate(n.data.path);
+        return;
+      }
+
+      if (!n.read) await markRead(n._id);
+    } catch (e) {
+      console.error('handleItemClick', e);
     }
   };
 
@@ -103,7 +200,7 @@ const NotificationsPage = () => {
   // unreadCount is provided by the notifications context
 
   return (
-    <div className="sub-page">
+    <div className="sub-page notifications-page">
       <header className="sub-header">
         <button className="back-btn" onClick={() => navigate('/account')}>
           <FiArrowLeft size={24} />
@@ -166,7 +263,7 @@ const NotificationsPage = () => {
                     <div 
                       key={notification._id} 
                       className={`notification-item ${!notification.read ? 'unread' : ''}`}
-                      onClick={() => !notification.read && handleMarkRead(notification._id)}
+                      onClick={() => handleItemClick(notification)}
                     >
                       <div className={`notification-icon ${notification.type}`}>
                         {getIcon(notification.type)}
@@ -206,7 +303,7 @@ const NotificationsPage = () => {
                     <div 
                       key={notification._id} 
                       className={`notification-item ${!notification.read ? 'unread' : ''}`}
-                      onClick={() => { /* read items no-op on click */ }}
+                      onClick={() => handleItemClick(notification)}
                     >
                       <div className={`notification-icon ${notification.type}`}>
                         {getIcon(notification.type)}

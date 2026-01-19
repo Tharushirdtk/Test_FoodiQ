@@ -3,6 +3,12 @@
   min-height: 100vh;
 }
 
+:root {
+  /* header and bottom nav heights used for placing the support chat box */
+  --header-height: 64px;
+  --bottom-nav-height: 64px;
+}
+
 /* Common Styles */
 .container {
   max-width: 1200px;
@@ -199,6 +205,116 @@
   width: 44px;
   height: 44px;
   object-fit: cover;
+}
+
+/* Ensure header icon buttons render as circles */
+.account-header .btn-icon,
+.product-header .btn-icon,
+.sub-header .btn-icon,
+.product-header .header-actions .btn-icon,
+.sub-header .header-actions .btn-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 50% !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  border: 1px solid var(--border-color);
+  transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.account-header .btn-icon svg,
+.product-header .btn-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* hover / active states for header icon buttons */
+.account-header .btn-icon:hover,
+.product-header .btn-icon:hover,
+.sub-header .btn-icon:hover,
+.product-header .header-actions .btn-icon:hover,
+.sub-header .header-actions .btn-icon:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 6px 18px rgba(255, 107, 53, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Center logo variant: hide title and center logo while keeping actions on the right */
+.account-header.center-logo {
+  justify-content: center;
+  position: relative;
+}
+.account-header.center-logo h1 {
+  display: none;
+}
+.account-header.center-logo .header-actions {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.account-header.center-logo .logo-btn {
+  margin: 0 auto;
+}
+
+/* Apply same circular icon styles to top headers (home/store) */
+.header .btn-icon,
+.header-top .btn-icon,
+.store-header .btn-icon,
+.store-header .header-actions .btn-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 50% !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  border: 1px solid var(--border-color);
+  transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.header .btn-icon svg,
+.store-header .btn-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.header .btn-icon:hover,
+.header-top .btn-icon:hover,
+.store-header .btn-icon:hover,
+.store-header .header-actions .btn-icon:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 6px 18px rgba(255, 107, 53, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Re-apply logo button override after generic header icon rules to prevent accidental overrides */
+.logo-btn.btn-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50% !important;
+  padding: 2px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-white);
+  border: 2px solid var(--primary-color) !important;
+  overflow: hidden;
+}
+
+.logo-btn.btn-icon:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
 }
 
 /* Global Bottom Navigation */

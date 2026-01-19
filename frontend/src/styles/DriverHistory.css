@@ -1,0 +1,86 @@
+/* Modern styles for DriverHistory */
+.history-cards {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 12px;
+}
+
+.history-card {
+	background: var(--bg-white);
+	border-radius: 12px;
+	padding: 14px 16px;
+	box-shadow: 0 6px 18px var(--shadow-color);
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+/* Strong overrides to counter global wallet/history transparency rules */
+.driver-history .history-card,
+.vendor-history .history-card,
+.wallet-page .history-card,
+.driver-history .info-section .history-card,
+.vendor-history .info-section .history-card {
+	background: var(--bg-white) !important;
+	border-radius: 12px !important;
+	padding: 14px 16px !important;
+	box-shadow: 0 6px 18px var(--shadow-color) !important;
+	min-height: initial !important;
+}
+
+/* Remove the white card container for driver and vendor history pages */
+.driver-history .info-section,
+.vendor-history .info-section,
+.wallet-page .info-section {
+	/* keep outer container neutral but ensure inner cards have visible background */
+	background: transparent !important;
+	box-shadow: none !important;
+	border-radius: 0 !important;
+	padding: 0 !important;
+}
+
+/* Stronger rule to ensure history cards show background inside neutral sections */
+.driver-history .info-section .history-card,
+.vendor-history .info-section .history-card,
+.wallet-page .info-section .history-card {
+	background: var(--bg-white);
+	border-radius: 12px;
+	box-shadow: 0 6px 18px var(--shadow-color);
+}
+
+.driver-history .sub-content,
+.vendor-history .sub-content,
+.wallet-page .sub-content {
+	max-width: 1100px;
+	margin: 0 auto;
+	padding: 12px 20px 80px;
+}
+
+.history-card-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.history-card-title {
+	font-weight: 700;
+	color: var(--text-dark);
+}
+
+.history-card-badge {
+	font-size: 13px;
+	padding: 6px 10px;
+	border-radius: 999px;
+	background: rgba(0,0,0,0.04);
+	color: var(--text-dark);
+	text-transform: capitalize;
+}
+
+.history-card-meta {
+	color: var(--text-gray);
+	font-size: 13px;
+}
+
+@media (min-width: 900px) {
+	.history-cards { grid-template-columns: repeat(2, 1fr); }
+}

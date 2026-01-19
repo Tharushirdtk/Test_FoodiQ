@@ -1,0 +1,43 @@
+.text-input-wrapper input,
+.text-input-wrapper textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 15px;
+  color: var(--text-dark);
+  background: var(--bg-white);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.text-input-wrapper input:focus,
+.text-input-wrapper textarea:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(255,107,53,0.06);
+}
+
+.text-input-wrapper textarea {
+  resize: vertical;
+}
+
+/* Placeholder styling to match global app styles */
+.text-input-wrapper input::placeholder,
+.text-input-wrapper textarea::placeholder {
+  color: var(--text-light);
+  opacity: 1;
+}
+
+.text-input-wrapper input::-webkit-input-placeholder,
+.text-input-wrapper textarea::-webkit-input-placeholder {
+  color: var(--text-light);
+}
+
+/* Disabled inputs */
+.text-input-wrapper input:disabled,
+.text-input-wrapper textarea:disabled {
+  background: var(--bg-light, #f5f5f5);
+  color: var(--text-light, #9ca3af);
+  cursor: not-allowed;
+  border-color: var(--border-color);
+}

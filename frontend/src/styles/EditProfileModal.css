@@ -10,7 +10,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 12000;
   padding: 20px;
 }
 
@@ -20,8 +20,11 @@
   width: 100%;
   max-width: 520px;
   max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   animation: editProfileSlideUp 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 @keyframes editProfileSlideUp {
@@ -39,7 +42,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
+  /* equalize spacing above/below buttons: slightly increase bottom padding */
+  padding: 20px 24px 24px;
   border-bottom: 1px solid var(--border-color);
   position: relative;
 }
@@ -74,6 +78,11 @@
 
 .edit-profile-modal-content {
   padding: 24px 32px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  /* keep space for the footer so content doesn't peek out beneath it */
+  padding-bottom: 120px;
 }
 
 /* Avatar Section */
@@ -163,6 +172,40 @@
   gap: 24px;
 }
 
+/* Make vendor blocks span full width of the grid so header and fields sit on a new row */
+.vendor-block {
+  grid-column: 1 / -1;
+  margin-top: 0;
+}
+
+/* Remove the grid gap above vendor blocks placed inside the form grid
+   so section headings (Store / Vehicle Details) sit directly below
+   the previous form row. This cancels the parent grid's `gap: 24px`. */
+.edit-profile-form-fields > .vendor-block {
+  margin-top: -24px;
+}
+
+.vendor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+}
+
+/* make specific fields span full width in the vendor grid */
+.vendor-grid .full-row {
+  grid-column: 1 / -1;
+}
+
+/* Slightly smaller section headers */
+.edit-profile-modal-content h3 {
+  font-size: 16px;
+  margin: 0 0 8px 0;
+}
+.edit-profile-modal-content h4 {
+  font-size: 14px;
+  margin: 0 0 6px 0;
+}
+
 .edit-profile-form-group {
   display: flex;
   flex-direction: column;
@@ -241,9 +284,21 @@
 .edit-profile-modal-actions {
   display: flex;
   gap: 12px;
-  margin-top: 24px;
-  padding-top: 24px;
+  margin: 0;
+  padding: 20px 24px;
   border-top: 1px solid var(--border-color);
+  background: var(--bg-white);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  /* remove extra corner rounding here so footer sits flush with modal edge */
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  align-items: center;
+  min-height: 84px;
+  box-sizing: border-box;
 }
 
 .edit-profile-modal-actions .edit-profile-btn {

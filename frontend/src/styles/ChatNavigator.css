@@ -1,0 +1,93 @@
+.chat-navigator {
+  position: fixed;
+  right: 24px;
+  top: 120px;
+  width: 260px;
+  background: var(--bg-card, var(--bg-white));
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  z-index: 90;
+}
+
+.chat-nav-header {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.chat-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.chat-nav-item:hover {
+  background: var(--bg-light);
+  border-color: var(--border-color);
+}
+
+.chat-nav-icon {
+  color: var(--primary-color);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-nav-label {
+  font-size: 14px;
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+/* Ensure chat navigator labels are readable in dark mode */
+:root.dark-mode .chat-nav-label {
+  color: #fff !important;
+}
+
+.chat-nav-action {
+  margin-left: auto;
+  color: var(--text-gray);
+}
+
+.chat-role-tag {
+  margin-left: 8px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.chat-role-tag.role-vendor {
+  background: rgba(255,107,53,0.12);
+  color: var(--primary-color);
+}
+
+.chat-role-tag.role-customer {
+  background: rgba(0,0,0,0.06);
+  color: #444;
+}
+
+.chat-role-tag.role-driver {
+  background: rgba(33,150,243,0.08);
+  color: #1976d2;
+}
+
+@media (max-width: 1024px) {
+  .chat-navigator { display: none; }
+}

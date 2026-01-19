@@ -34,20 +34,26 @@ const Dropdown = ({
 
   // Close dropdown when clicking outside
   useEffect(() => {
+    // Use capture phase for outside click detection so it runs before
+    // any stopPropagation handlers inside modals or other components.
     const handleClickOutside = (event) => {
       const target = event.target;
-      // If click is outside both the trigger and the rendered menu, close
-      if (dropdownRef.current && menuRef.current) {
-        if (!dropdownRef.current.contains(target) && !menuRef.current.contains(target)) {
-          setIsOpen(false);
-        }
-      } else if (dropdownRef.current && !dropdownRef.current.contains(target)) {
+      if (!dropdownRef.current) return;
+      // If menuRef exists (portal), consider clicks on it as inside
+      const clickedInsideTrigger = dropdownRef.current.contains(target);
+      const clickedInsideMenu = menuRef.current && menuRef.current.contains && menuRef.current.contains(target);
+      if (!clickedInsideTrigger && !clickedInsideMenu) {
         setIsOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside, true);
+    // support touch devices where touchstart may be used
+    document.addEventListener('touchstart', handleClickOutside, true);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside, true);
+      document.removeEventListener('touchstart', handleClickOutside, true);
+    };
   }, []);
 
   // Close on escape key

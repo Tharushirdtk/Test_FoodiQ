@@ -1,0 +1,56 @@
+.ea-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10050;
+  /* small horizontal gutter */
+  padding: 0 20px;
+}
+
+.ea-modal-wrapper {
+  background: var(--bg-white);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 920px;
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.ea-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-bottom: 140px; /* leave room for footer */
+}
+
+.ea-modal-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ea-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: 12px;
+  align-items: center; /* vertical centering */
+  justify-content: stretch;
+  flex-shrink: 0;
+}
+
+.ea-modal-footer .btn {
+  flex: 1 1 0;
+  min-width: 0;
+}

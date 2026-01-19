@@ -59,6 +59,23 @@
   border-color: #d0d0d0;
 }
 
+/* Disabled state */
+.country-dropdown.disabled .country-trigger {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.country-dropdown.disabled .country-value {
+  color: var(--text-light, #9ca3af);
+}
+
+/* Make disabled trigger use subtle grey background and arrow */
+.country-dropdown.disabled .country-trigger {
+  background: var(--bg-light, #f5f5f5);
+}
+.country-dropdown.disabled .chev {
+  color: var(--text-light, #9ca3af);
+}
+
 .country-trigger.open {
   border-color: var(--primary-color);
   box-shadow: 0 6px 24px rgba(0,0,0,0.08);
@@ -97,6 +114,11 @@
   border: 1px solid #e5e5e5;
   border-radius: 10px;
   font-size: 14px;
+}
+
+.country-list input:disabled {
+  background: var(--bg-light, #f5f5f5);
+  cursor: not-allowed;
 }
 
 .country-list ul {

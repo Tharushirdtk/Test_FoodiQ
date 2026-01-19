@@ -1,0 +1,22 @@
+.supportDash { }
+.content { display:flex; gap:16px; align-items:flex-start; }
+.listColumn { flex: 1 1 0; max-width: 520px; border:1px solid var(--border-color, #eee); border-radius:6px; overflow:hidden; }
+.listHeader { padding:12px; border-bottom:1px solid var(--border-color, #eee); background:var(--bg-light, #fafafa); }
+.listBody { }
+.loading { padding:12px; }
+.empty { padding:12px; color: var(--text-gray, #777); }
+.chatPane { flex:1; min-height:400px; border:1px solid var(--border-color, #eee); border-radius:6px; padding:12px; }
+.chatHeader { margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+.placeholder { color: var(--text-gray, #666); }
+.item { padding:10px; border-bottom:1px solid var(--border-color, #eee); cursor:pointer; }
+.itemTitle { font-weight:600; }
+
+/* Instruction/info box styled like payment info */
+.infoBox {
+	margin-bottom: 16px;
+	padding: 16px;
+	background: var(--bg-white);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px var(--shadow-color);
+	color: var(--text-dark);
+}

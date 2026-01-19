@@ -2,16 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { FiSettings, FiMapPin, FiHeart, FiCreditCard, FiMessageSquare, FiLogOut, FiCheck, FiAlertCircle, FiPackage, FiBell, FiEdit2, FiCalendar, FiUser, FiPlus, FiTrash2, FiStar } from 'react-icons/fi';
+import { FiSettings, FiMapPin, FiHeart, FiCreditCard, FiMessageSquare, FiLogOut, FiCheck, FiAlertCircle, FiPackage, FiBell, FiEdit2, FiCalendar, FiUser, FiPlus, FiTrash2, FiStar, FiPhone, FiInfo, FiShoppingBag } from 'react-icons/fi';
 import NotificationsButton from '../components/NotificationsButton';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import PhoneCountrySelect from '../components/PhoneCountrySelect';
 import PhoneVerificationModal from '../components/PhoneVerificationModal';
 import EditProfileModal from '../components/EditProfileModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import Dropdown from '../components/Dropdown';
 import contactService from '../services/contactService';
+import RoleBadge from '../components/RoleBadge';
 import '../styles/AccountPage.css';
+import '../styles/AddContactPanel.css';
 
 const AccountPage = () => {
   const { user, logout, isAuthenticated, isGuest, loading, refreshUser } = useAuth();
@@ -67,19 +70,45 @@ const AccountPage = () => {
     }
   }, [isAuthenticated, loadPreferences]);
 
-  // quickActions: show full set for authenticated users, only support for guests
-  const quickActions = isGuest
-    ? [
-        { id: 6, icon: <FiMessageSquare size={24} />, label: 'Help & Support', subtitle: 'Get assistance', color: '#FF9800', path: '/support' }
-      ]
-    : [
-        { id: 1, icon: <FiPackage size={24} />, label: 'My Orders', subtitle: 'Track your orders', color: '#FF6B35', path: '/orders' },
-        { id: 2, icon: <FiMapPin size={24} />, label: 'Addresses', subtitle: 'Manage locations', color: '#4CAF50', path: '/account/addresses' },
-        { id: 3, icon: <FiHeart size={24} />, label: 'Favorites', subtitle: 'Saved items', color: '#E91E63', path: '/account/favorites' },
-        { id: 4, icon: <FiCreditCard size={24} />, label: 'Payment', subtitle: 'Cards & wallet', color: '#2196F3', path: '/account/payment' },
-        { id: 5, icon: <FiBell size={24} />, label: 'Notifications', subtitle: 'Alerts & updates', color: '#9C27B0', path: '/account/notifications' },
-        { id: 6, icon: <FiMessageSquare size={24} />, label: 'Help & Support', subtitle: 'Get assistance', color: '#FF9800', path: '/support' }
+  // quickActions: vary by auth/role
+  let quickActions = [];
+  if (isGuest) {
+    quickActions = [
+      { id: 6, icon: <FiMessageSquare size={24} />, label: 'Support', subtitle: 'Contact support for help', color: 'var(--accent-orange, #FF9800)', path: '/support' }
+    ];
+  } else if (user && user.role === 'support') {
+    // For support users show only Notifications as quick action
+    quickActions = [
+      { id: 5, icon: <FiBell size={24} />, label: 'Notifications', subtitle: 'Alerts & updates', color: 'var(--accent-purple, #9C27B0)', path: '/account/notifications' }
+    ];
+  } else {
+    // Drivers get a different set of quick actions
+      if (user && user.role === 'driver') {
+      quickActions = [
+        { id: 11, icon: <FiPackage size={24} />, label: 'Delivery History', subtitle: 'Past deliveries', color: 'var(--accent-1, #FF6B35)', path: '/driver/history' },
+        { id: 12, icon: <FiCreditCard size={24} />, label: 'Wallet', subtitle: 'Earnings & payouts', color: 'var(--info-color, #2196F3)', path: '/wallet' },
+        { id: 13, icon: <FiBell size={24} />, label: 'Notifications', subtitle: 'Alerts & updates', color: 'var(--accent-purple, #9C27B0)', path: '/account/notifications' },
+        { id: 14, icon: <FiMessageSquare size={24} />, label: 'Help & Support', subtitle: 'Get assistance', color: 'var(--accent-orange, #FF9800)', path: '/support' }
       ];
+    } else if (user && user.role === 'vendor') {
+      quickActions = [
+        { id: 21, icon: <FiPackage size={24} />, label: 'My Products', subtitle: 'Manage products', color: 'var(--accent-1, #FF6B35)', path: '/vendor/products' },
+        { id: 22, icon: <FiPackage size={24} />, label: 'Orders', subtitle: 'Orders for your store', color: 'var(--success-color, #4CAF50)', path: '/vendor/orders' },
+        { id: 23, icon: <FiPackage size={24} />, label: 'History', subtitle: 'Sales history', color: 'var(--accent-purple, #9C27B0)', path: '/vendor/history' },
+        { id: 24, icon: <FiCreditCard size={24} />, label: 'Wallet', subtitle: 'Revenue & payouts', color: 'var(--info-color, #2196F3)', path: '/wallet' },
+        { id: 25, icon: <FiBell size={24} />, label: 'Notifications', subtitle: 'Alerts & updates', color: 'var(--accent-purple, #9C27B0)', path: '/account/notifications' },
+      ];
+    } else {
+      quickActions = [
+        { id: 1, icon: <FiPackage size={24} />, label: 'My Orders', subtitle: 'Track your orders', color: 'var(--accent-1, #FF6B35)', path: '/orders' },
+        { id: 2, icon: <FiMapPin size={24} />, label: 'Addresses', subtitle: 'Manage locations', color: 'var(--success-color, #4CAF50)', path: '/account/addresses' },
+        { id: 3, icon: <FiHeart size={24} />, label: 'Favorites', subtitle: 'Saved items', color: 'var(--accent-pink, #E91E63)', path: '/account/favorites' },
+        { id: 4, icon: <FiCreditCard size={24} />, label: 'Payment', subtitle: 'Cards & wallet', color: 'var(--info-color, #2196F3)', path: '/account/payment' },
+        { id: 5, icon: <FiBell size={24} />, label: 'Notifications', subtitle: 'Alerts & updates', color: 'var(--accent-purple, #9C27B0)', path: '/account/notifications' },
+        { id: 6, icon: <FiMessageSquare size={24} />, label: 'Help & Support', subtitle: 'Get assistance', color: 'var(--accent-orange, #FF9800)', path: '/support' }
+      ];
+    }
+  }
 
   // handleUpdatePhone removed because phone update UI isn't active in this page
 
@@ -130,6 +159,20 @@ const AccountPage = () => {
   const confirmDeleteContact = async () => {
     if (!deletingContactId) return;
     try {
+      // Prevent deleting last owner contact for drivers
+      const ownerContactsCount = contacts.length;
+      const isDriver = user && user.role === 'driver';
+      const isVendor = user && user.role === 'vendor';
+      const vendorHasStorePhone = isVendor && user.vendorProfile && user.vendorProfile.storePhone;
+
+      // If deleting would remove the last owner contact and no store phone exists (for vendor)
+      if (deletingContactId && ((isDriver && ownerContactsCount <= 1) || (isVendor && ownerContactsCount <= 1 && !vendorHasStorePhone))) {
+        setPhoneError('Cannot delete the last contact. Add another contact or add a store contact first.');
+        setShowDeleteConfirm(false);
+        setDeletingContactId(null);
+        return;
+      }
+
       await contactService.deleteContact(deletingContactId);
       setPhoneSuccess('Contact deleted successfully!');
       setTimeout(() => setPhoneSuccess(null), 3000);
@@ -160,6 +203,18 @@ const AccountPage = () => {
     return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   };
 
+  // Helper to format store address object into a single line
+  const formatStoreAddress = (addr) => {
+    if (!addr) return 'Not set';
+    const parts = [];
+    if (addr.street) parts.push(addr.street);
+    if (addr.city) parts.push(addr.city);
+    if (addr.state) parts.push(addr.state);
+    if (addr.zip) parts.push(addr.zip);
+    if (addr.country) parts.push(addr.country);
+    return parts.join(', ');
+  };
+
   // Helper to format gender
   const formatGender = (gender) => {
     if (!gender) return 'Not set';
@@ -182,6 +237,14 @@ const AccountPage = () => {
         return <img src={src} alt="Avatar" className="profile-avatar-img" />;
       }
     }
+    // Vendor: show store icon placeholder; others use avatar text or emoji
+    if (user && user.role === 'vendor') {
+      return (
+        <div className="profile-avatar-placeholder">
+          <FiShoppingBag size={36} />
+        </div>
+      );
+    }
     return <span className="profile-avatar-text">{userData.avatar || '👤'}</span>;
   };
 
@@ -189,35 +252,43 @@ const AccountPage = () => {
     <div className="account-page">
       {/* Header */}
       <header className="account-header">
-            <button className="btn btn-icon logo-btn" onClick={() => navigate('/')}>
-              <img src="/images/logo.png" alt="FoodIQ" className="header-logo-small" />
-            </button>
-            <h1>My Account</h1>
-            <button
-              className="btn btn-icon"
-              onClick={() => {
-                const el = document.getElementById('preferences');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-                else navigate('/account/settings');
-              }}
-            >
-              <FiSettings size={24} />
-            </button>
-            <div style={{ marginLeft: 10, display: 'inline-block' }}>
-              <NotificationsButton />
-            </div>
-          </header>
+              <button className="btn btn-icon logo-btn" onClick={() => navigate('/')}>
+                <img src="/images/logo.png" alt="FoodIQ" className="header-logo-small" />
+              </button>
+              <h1>My Account</h1>
+              {!isGuest && (
+                <>
+                  <button
+                    className="btn btn-icon"
+                    onClick={() => {
+                      const el = document.getElementById('preferences');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      else navigate('/account/settings');
+                    }}
+                  >
+                    <FiSettings size={24} />
+                  </button>
+                  <div style={{ marginLeft: 10, display: 'inline-block' }}>
+                    <NotificationsButton />
+                  </div>
+                </>
+              )}
+            </header>
 
         <div className="account-content">
         {/* Profile Card */}
         <div className="profile-card">
           <div className="profile-avatar">{getAvatarDisplay()}</div>
-          <div className="profile-info">
+            <div className="profile-info">
+              {userData.displayName && userData.name !== userData.displayName && (
+                <p className="profile-full-name">{userData.name}</p>
+              )}
               <h2>{userData.displayName || userData.name}</h2>
               {userData.displayName && userData.name !== userData.displayName && (
                 <p className="profile-full-name">{userData.name}</p>
               )}
               <p>{userData.email}</p>
+              <RoleBadge />
               {userData.phone && <p className="profile-phone">{userData.phone}</p>}
               {isGuest && (
                 <div className="guest-banner">
@@ -240,17 +311,19 @@ const AccountPage = () => {
         {/* User Details - Only for authenticated users */}
         {isAuthenticated && !isGuest && (
           <div className="section user-details-section">
-            <h3>Personal Information</h3>
+            <h3>{user && user.role === 'vendor' ? 'Vendor Details' : 'Personal Information'}</h3>
             <div className="details-grid">
-              <div className="detail-item">
-                <div className="detail-icon">
-                  <FiUser size={18} />
+              {(user && user.role !== 'vendor' && user.role !== 'driver') && (
+                <div className="detail-item">
+                  <div className="detail-icon">
+                    <FiUser size={18} />
+                  </div>
+                  <div className="detail-content">
+                    <span className="detail-label">Display Name</span>
+                    <span className="detail-value">{userData.displayName || 'Not set'}</span>
+                  </div>
                 </div>
-                <div className="detail-content">
-                  <span className="detail-label">Display Name</span>
-                  <span className="detail-value">{userData.displayName || 'Not set'}</span>
-                </div>
-              </div>
+              )}
               <div className="detail-item">
                 <div className="detail-icon">
                   <FiCalendar size={18} />
@@ -280,6 +353,107 @@ const AccountPage = () => {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Vendor: Store Details */}
+        {isAuthenticated && !isGuest && user && user.role === 'vendor' && (
+          <div className="section vendor-store-section">
+            <h3>Store Details</h3>
+            <div className="details-grid">
+              <div className="detail-item">
+                <div className="detail-icon">
+                  <FiPackage size={18} />
+                </div>
+                <div className="detail-content">
+                  <span className="detail-label">Store Name</span>
+                  <span className="detail-value">{user.vendorProfile?.storeName || 'Not set'}</span>
+                </div>
+              </div>
+
+              <div className="detail-item">
+                <div className="detail-icon">
+                  <FiPhone size={18} />
+                </div>
+                <div className="detail-content">
+                  <span className="detail-label">Store Phone</span>
+                  <span className="detail-value">{user.vendorProfile?.storePhone || 'Not set'}</span>
+                </div>
+              </div>
+
+              <div className="detail-item">
+                <div className="detail-icon">
+                  <FiMapPin size={18} />
+                </div>
+                <div className="detail-content">
+                  <span className="detail-label">Store Address</span>
+                  <span className="detail-value">{formatStoreAddress(user.vendorProfile?.storeAddress) || 'Not set'}</span>
+                </div>
+              </div>
+
+              <div className="detail-item">
+                <div className="detail-icon">
+                  <FiInfo size={18} />
+                </div>
+                <div className="detail-content">
+                  <span className="detail-label">Business Reg. No.</span>
+                  <span className="detail-value">{user.vendorProfile?.businessRegNumber || 'Not set'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Driver: Vehicle Details */}
+        {isAuthenticated && !isGuest && user && user.role === 'driver' && (
+          <div className="section driver-vehicle-section">
+            <h3>Vehicle Details</h3>
+            <div className="details-grid">
+              {/* Only render vehicle image block if an image URL exists */}
+              {user.driverProfile?.vehicleImage && (
+                <div className="detail-item detail-item-full">
+                  <div className="detail-content">
+                    <div className="detail-value vehicle-image-preview">
+                      {(() => {
+                        const img = user.driverProfile.vehicleImage;
+                        const src = /^https?:\/\//.test(img) ? img : `${process.env.REACT_APP_API_URL || ''}${img}`;
+                        return <img src={src} alt="Vehicle" style={{ maxWidth: '100%', borderRadius: 8 }} />;
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="detail-item">
+                <div className="detail-icon">
+                  <FiPackage size={18} />
+                </div>
+                <div className="detail-content">
+                  <span className="detail-label">Vehicle Type</span>
+                  <span className="detail-value">{user.driverProfile?.vehicleType || 'Not set'}</span>
+                </div>
+              </div>
+
+              <div className="detail-item">
+                <div className="detail-icon">
+                  <FiInfo size={18} />
+                </div>
+                <div className="detail-content">
+                  <span className="detail-label">Vehicle Number</span>
+                  <span className="detail-value">{user.driverProfile?.vehicleNumber || user.driverProfile?.plateNumber || user.driverProfile?.licensePlate || 'Not set'}</span>
+                </div>
+              </div>
+
+              <div className="detail-item">
+                <div className="detail-icon">
+                  <FiUser size={18} />
+                </div>
+                <div className="detail-content">
+                  <span className="detail-label">License Number</span>
+                  <span className="detail-value">{user.driverProfile?.licenseNumber || 'Not set'}</span>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -320,7 +494,7 @@ const AccountPage = () => {
 
               {/* Add Contact Form */}
               {showAddContact && (
-                <div className="add-contact-form">
+                <div className="add-contact-form add-contact-panel">
                   <div className="contact-form-row">
                     <Dropdown
                       options={[
@@ -341,12 +515,13 @@ const AccountPage = () => {
                       value={newContactPhone}
                       onChange={setNewContactPhone}
                       placeholder="Enter phone number"
-                      className="phone-input-mini contact-phone-input"
+                      className="phone-input-mini contact-phone-input add-contact-phone"
+                      countrySelectComponent={PhoneCountrySelect}
                     />
                   </div>
                   <div className="contact-form-actions">
                     <button 
-                      className="btn btn-small" 
+                      className="btn btn-small btn-primary" 
                       onClick={handleAddContact} 
                       disabled={contactsLoading}
                     >
@@ -417,14 +592,25 @@ const AccountPage = () => {
                             <FiStar size={16} />
                           </button>
                         )}
-                        {/* Delete - can delete any contact */}
-                        <button 
-                          className="contact-action-btn delete"
-                          onClick={() => handleDeleteContact(contact._id)}
-                          title="Delete"
-                        >
-                          <FiTrash2 size={16} />
-                        </button>
+                        {/* Delete - disable if this would remove the last required contact for driver/vendor */}
+                        {(() => {
+                          const ownerContactsCount = contacts.length;
+                          const isDriver = user && user.role === 'driver';
+                          const isVendor = user && user.role === 'vendor';
+                          const vendorHasStorePhone = isVendor && user.vendorProfile && user.vendorProfile.storePhone;
+                          const isLastOwnerContact = ownerContactsCount <= 1;
+                          const cannotDelete = (isDriver && isLastOwnerContact) || (isVendor && isLastOwnerContact && !vendorHasStorePhone);
+                          return (
+                            <button
+                              className={`contact-action-btn delete ${cannotDelete ? 'disabled' : ''}`}
+                              onClick={() => cannotDelete ? setPhoneError('Cannot delete the last contact. Add another contact or add a store contact first.') : handleDeleteContact(contact._id)}
+                              title={cannotDelete ? 'Cannot delete last required contact' : 'Delete'}
+                              disabled={cannotDelete}
+                            >
+                              <FiTrash2 size={16} />
+                            </button>
+                          );
+                        })()}
                       </div>
                     </div>
                   ))}
@@ -446,7 +632,10 @@ const AccountPage = () => {
               <div
                 key={action.id}
                 className="action-card"
-                onClick={() => (action.path ? navigate(action.path) : null)}
+                onClick={() => {
+                  if (isGuest) return navigate('/login');
+                  if (action.path) navigate(action.path);
+                }}
               >
                 <div className="action-icon" style={{ backgroundColor: `${action.color}15`, color: action.color }}>
                   {action.icon}

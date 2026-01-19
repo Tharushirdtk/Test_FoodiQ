@@ -26,6 +26,16 @@ const profileService = {
     return res.data;
   },
 
+  // Upload vehicle image and optional vehicle info
+  uploadVehicle: async (file, vehicleNumber, licenseNumber) => {
+    const formData = new FormData();
+    if (file) formData.append('vehicleImage', file);
+    if (vehicleNumber) formData.append('vehicleNumber', vehicleNumber);
+    if (licenseNumber) formData.append('licenseNumber', licenseNumber);
+    const res = await api.post('/profile/vehicle', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+    return res.data;
+  },
+
   // Delete avatar
   deleteAvatar: async () => {
     const res = await api.delete('/profile/avatar');

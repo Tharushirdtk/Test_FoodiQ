@@ -15,8 +15,8 @@ const createTransporter = () => {
 
 // Base email template with FoodiQ theme
 const getEmailTemplate = (content, previewText = '') => {
-  // switched to Postimg host as requested
-  const logoUrl = 'https://i.postimg.cc/brZQhckn/logo.png';
+  // Use externally hosted webp image provided by user
+  const logoUrl = 'https://images.iimg.live/images/wonderful-moment-9258.webp';
   
   return `
 <!DOCTYPE html>
@@ -242,26 +242,30 @@ const sendPhoneCodeEmail = async (user, code) => {
 };
 
 // Support email content template
-const getSupportEmailContent = (customerName, customerEmail, message, userId) => `
+const getSupportEmailContent = (customerName, customerEmail, message, conversationId) => {
+  const appUrl = process.env.APP_URL ? process.env.APP_URL.replace(/\/$/, '') : 'http://localhost:3000';
+  const chatUrl = conversationId ? `${appUrl}/support/chat/${conversationId}` : null;
+  return `
   <h1>New Support Request</h1>
   <p>A new support ticket has been submitted.</p>
   
   <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin: 24px 0;">
     <p style="margin: 0 0 12px;"><strong>From:</strong> ${customerName}</p>
     <p style="margin: 0 0 12px;"><strong>Email:</strong> ${customerEmail}</p>
-    <p style="margin: 0 0 12px;"><strong>User ID:</strong> ${userId}</p>
     <p style="margin: 0 0 8px;"><strong>Message:</strong></p>
     <div style="background: #fff; padding: 16px; border-radius: 8px; border-left: 4px solid #FF6B35;">
       ${message.replace(/\n/g, '<br>')}
     </div>
   </div>
+  ${chatUrl ? `<div style="text-align:center; margin: 16px 0;"><a href="${chatUrl}" style="display:inline-block;padding:10px 18px;background:#FF6B35;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">Open Conversation</a></div>` : ''}
   
   <p style="color: #999; font-size: 14px;">This email was sent from the FoodiQ support system.</p>
 `;
+}
 
 // Send support email to support team
-const sendSupportEmail = async ({ to, subject, customerEmail, customerName, message, userId }) => {
-  const html = getEmailTemplate(getSupportEmailContent(customerName, customerEmail, message, userId), 'New support request received');
+const sendSupportEmail = async ({ to, subject, customerEmail, customerName, message, conversationId }) => {
+  const html = getEmailTemplate(getSupportEmailContent(customerName, customerEmail, message, conversationId), 'New support request received');
   
   const transporter = createTransporter();
   await transporter.sendMail({
@@ -270,7 +274,7 @@ const sendSupportEmail = async ({ to, subject, customerEmail, customerName, mess
     replyTo: customerEmail,
     subject: subject,
     html,
-    text: `New support request from ${customerName} (${customerEmail}):\n\n${message}\n\nUser ID: ${userId}`,
+    text: `New support request from ${customerName} (${customerEmail}):\n\n${message}` + (conversationId ? `\n\nOpen conversation: ${process.env.APP_URL ? process.env.APP_URL.replace(/\/$/, '') : 'http://localhost:3000'}/support/chat/${conversationId}` : ''),
   });
 };
 

@@ -1,0 +1,115 @@
+/*
+  SupportPage.module.css
+  Scoped styles for SupportPage. All selectors are prefixed with .support-
+*/
+
+.support-section {
+  padding: 1.5rem;
+  background: var(--bg-light);
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+}
+
+.support-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.support-btn {
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  background: var(--bg-white, #fff);
+}
+
+.support-btn:hover {
+  background: #e55a2b;
+}
+
+.support-btn {
+  background: var(--primary-color);
+  color: var(--text-on-primary, #fff);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.support-btn:hover {
+  background: var(--primary-dark, #e55a2b);
+}
+
+.support-faq-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-white);
+}
+
+.support-faq-question {
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.support-faq-answer {
+  margin-top: 10px;
+  color: var(--text-gray);
+  line-height: 1.6;
+}
+
+.support-modal { }
+
+.support-modal-content { }
+
+.support-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.support-form-label {
+  font-weight: 500;
+}
+
+.support-form-input,
+.support-form-textarea {
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.support-form-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.support-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-gray, #888);
+}
+
+@media (max-width: 600px) {
+  .support-section, .support-modal-content {
+    padding: 1rem;
+  }
+}

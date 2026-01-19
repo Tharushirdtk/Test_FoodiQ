@@ -36,6 +36,9 @@ code {
   --success-color: #4CAF50;
   --warning-color: #FFC107;
   --danger-color: #F44336;
+  --text-on-primary: #fff;
+  --muted-color: #6b6b6b;
+  --text-muted: var(--muted-color);
   --shadow-color: rgba(0, 0, 0, 0.1);
   --overlay-color: rgba(0, 0, 0, 0.5);
 }
@@ -56,6 +59,9 @@ code {
   --success-color: #66BB6A;
   --warning-color: #FFD54F;
   --danger-color: #EF5350;
+  --text-on-primary: #fff;
+  --muted-color: #9a9a9a;
+  --text-muted: var(--muted-color);
   --shadow-color: rgba(0, 0, 0, 0.3);
   --overlay-color: rgba(0, 0, 0, 0.7);
 }
@@ -72,5 +78,35 @@ code {
 :root.dark-mode input::placeholder,
 :root.dark-mode textarea::placeholder {
   color: var(--text-gray);
+}
+
+/* Consistent placeholder styling across the app */
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+  color: var(--text-light);
+  opacity: 1;
+}
+
+/* Browser-specific placeholder selectors for broader compatibility */
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder,
+select::-webkit-input-placeholder {
+  color: var(--text-light);
+}
+input::-moz-placeholder,
+textarea::-moz-placeholder,
+select::-moz-placeholder {
+  color: var(--text-light);
+}
+input:-ms-input-placeholder,
+textarea:-ms-input-placeholder,
+select:-ms-input-placeholder {
+  color: var(--text-light);
+}
+input::-ms-input-placeholder,
+textarea::-ms-input-placeholder,
+select::-ms-input-placeholder {
+  color: var(--text-light);
 }
 

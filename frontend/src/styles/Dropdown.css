@@ -80,6 +80,17 @@
   text-overflow: ellipsis;
 }
 
+/* Disabled state: make typed/selected text grey and trigger background subtle grey */
+.dropdown.disabled > .dropdown-trigger {
+  background: var(--bg-light, #f5f5f5);
+}
+.dropdown.disabled .dropdown-value {
+  color: var(--text-light, #9ca3af);
+}
+.dropdown.disabled .dropdown-arrow {
+  color: var(--text-light, #9ca3af);
+}
+
 .dropdown > .dropdown-trigger.placeholder .dropdown-value {
   color: var(--text-gray, #ADADAD);
   font-weight: 400;
@@ -111,7 +122,8 @@
   border: 1.5px solid var(--border-color, #E5E5E5);
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  z-index: 99999;
+  /* Ensure dropdown menus are above modals and overlays */
+  z-index: 1200000;
   max-height: 280px;
   overflow-y: auto;
   animation: dropdownSlideDown 0.15s ease-out;

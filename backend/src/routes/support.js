@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { createTicket } = require('../controllers/supportController');
-const { protect, optionalAuth } = require('../middleware/auth');
+const { protect, optionalAuth, requireRole } = require('../middleware/auth');
 const { sendSupportEmail } = require('../utils/mailer');
 
-router.post('/tickets', protect, createTicket);
+// Only support and admin can create internal tickets
+router.post('/tickets', protect, requireRole(['support', 'admin']), createTicket);
 
 // Public ticket submission (with optional auth)
 router.post('/ticket', optionalAuth, async (req, res) => {
@@ -16,17 +17,17 @@ router.post('/ticket', optionalAuth, async (req, res) => {
     
     // Send email notification to support team
     try {
-      await sendSupportEmail({
+      const { queueEmail } = require('../utils/notificationQueue');
+      queueEmail(async () => { await sendSupportEmail({
         to: 'tharu.dev.foodiq@gmail.com',
         subject: `[Support] ${subject}`,
         customerEmail: email || req.user?.email || 'Not provided',
-        customerName: req.user?.name || 'Guest User',
+        customerName: req.user?.displayName || req.user?.name || 'Guest User',
         message: message,
-        userId: req.user?.id || 'N/A'
-      });
-      console.log('Support email sent successfully');
+      }); });
+      console.log('Support email queued');
     } catch (emailError) {
-      console.error('Failed to send support email:', emailError);
+      console.error('Failed to queue support email:', emailError);
       // Don't fail the request if email fails, still acknowledge receipt
     }
     

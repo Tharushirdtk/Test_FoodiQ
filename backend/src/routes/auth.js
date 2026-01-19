@@ -4,6 +4,7 @@ const rateLimit = require('express-rate-limit');
 const {
   register,
   registerStep1,
+  validateRegisterStep1,
   registerStep2,
   registerFull,
   sendPhoneCode,
@@ -55,11 +56,35 @@ const smsLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Login limiter: use email as key when available so a single IP (dev laptop)
+// can test multiple accounts without hitting the IP-based limit.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  message: { message: 'Too many attempts. Please try again after 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req /*, res*/) => {
+    try {
+      const email = req?.body?.email;
+      if (email) return String(email).toLowerCase();
+      // Use express-rate-limit's IPv6-safe IP helper
+      if (rateLimit && typeof rateLimit.ipKeyGenerator === 'function') {
+        return rateLimit.ipKeyGenerator(req.ip);
+      }
+      return req.ip;
+    } catch (e) {
+      return req.ip;
+    }
+  },
+});
+
 // Public routes
 router.post('/register', authLimiter, registerFull);
 router.post('/register/step1', authLimiter, validate(registerStep1Schema), registerStep1);
+router.post('/register/validate-step1', authLimiter, validate(registerStep1Schema), validateRegisterStep1);
 router.post('/register/step2', authLimiter, validate(registerStep2Schema), registerStep2);
-router.post('/login', authLimiter, validate(loginSchema), login);
+router.post('/login', loginLimiter, validate(loginSchema), login);
 
 // Email verification
 router.get('/verify-email', verifyEmail);

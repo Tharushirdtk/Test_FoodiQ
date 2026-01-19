@@ -1,0 +1,110 @@
+.order-chat-page {
+  display: flex;
+  flex-direction: column;
+  /* make page fill viewport minus bottom nav so chat can reach footer */
+  min-height: calc(100vh - var(--bottom-nav-height, 64px));
+}
+
+/* Scoped override to avoid conflicts with global .sub-page padding */
+.order-chat-sub-page {
+  /* avoid the global .sub-page bottom padding which pushes content beyond viewport */
+  padding-bottom: 0;
+  margin-top: -13px;
+  /* ensure the order chat page uses the intended min-height */
+  min-height: calc(100vh - var(--bottom-nav-height, 64px));
+}
+
+/* Simple two-column chat layout: main chat + right sidebar navigator */
+.chat-wrapper {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  /* increased width so chat area is much wider on desktop screens */
+  max-width: 1400px;
+  margin: 0 auto;
+  flex: 1 1 auto; /* allow wrapper to expand to fill container */
+  /* keep sidebar aligned to top while allowing main chat to stretch */
+  align-items: flex-start;
+}
+.chat-main {
+  flex: 1 1 0;
+  background: var(--bg-card, var(--bg-white, #fff));
+  border-radius: 12px;
+  /* larger minimum width so chat column is spacious */
+  min-height: 60vh;
+  min-width: 820px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px var(--shadow-color);
+  overflow: hidden;
+}
+
+/* optional class to make chat fill the available viewport height exactly */
+.chat-main.full-height {
+  height: calc(100vh - var(--header-height, 96px) - var(--bottom-nav-height, 64px) - 48px);
+}
+.chat-sidebar {
+  width: 300px;
+  background: var(--bg-card, var(--bg-white, #fff));
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 2px 8px var(--shadow-color);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.chat-sidebar h3 { margin: 0 0 8px 0; }
+.chat-list { display: flex; flex-direction: column; gap: 8px; flex: 1 1 auto; overflow: auto; padding-right: 6px; }
+.chat-list-item { text-align: left; padding: 10px 12px; border-radius: 8px; background: transparent; border: 1px solid var(--border-color); cursor: pointer; }
+.chat-list-item:hover { background: var(--bg-light); }
+
+.chat-role-tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.06);
+  color: var(--text-gray);
+  margin-top: 4px;
+}
+/* dark-mode: make role tag visible on dark backgrounds */
+:root.dark-mode .chat-role-tag {
+  background: rgba(255,255,255,0.04);
+  color: var(--text-gray);
+}
+.role-vendor { background: rgba(255, 193, 7, 0.12); color: #a36b00; }
+.role-driver { background: rgba(33, 150, 243, 0.08); color: #0b6fb1; }
+.role-customer { background: rgba(76,175,80,0.08); color: #2f7a2f; }
+
+/* Layout for chat item: name on left, tag on right; tag wraps to next row if needed */
+.chat-item-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.chat-name {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0; /* allow truncation inside flex */
+  flex: 1 1 auto;
+}
+
+/* Make chat names readable in dark mode */
+:root.dark-mode .chat-name {
+  color: #fff !important;
+}
+.chat-list-item .chat-role-tag {
+  margin-top: 0; /* reset previous top margin */
+  margin-left: auto; /* push tag to the right when on same line */
+  flex: 0 0 auto;
+}
+
+@media (max-width: 1100px) {
+  .chat-wrapper { flex-direction: column; }
+  .chat-sidebar { width: 100%; }
+  .chat-main { min-width: auto; }
+}

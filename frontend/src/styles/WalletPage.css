@@ -1,0 +1,191 @@
+/* Modern wallet styles */
+.wallet-page {
+  padding: 8px 0;
+}
+.wallet-balance {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  margin-bottom: 8px;
+}
+.wallet-amount {
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--primary-color);
+  line-height: 1;
+}
+.wallet-label {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--text-gray);
+  font-weight: 600;
+}
+
+@media (min-width: 900px) {
+  .wallet-amount {
+    font-size: 72px;
+  }
+  .wallet-label {
+    font-size: 16px;
+  }
+}
+
+.modern-wallet .wallet-history-cards {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+.wallet-history-card {
+  /* Make order cards stand out with a soft background and spacing */
+  background: var(--bg-card, var(--bg-white));
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 4px rgba(16,24,40,0.06);
+  border: 1px solid rgba(16,24,40,0.04);
+}
+.wallet-history-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.wallet-history-card-title {
+  font-weight: 700;
+  color: var(--text-dark);
+}
+.wallet-history-card-badge {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+.wallet-history-card-meta {
+  color: var(--text-gray);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+/* Add extra spacing below the analytics section so cards don't butt against it */
+.wallet-page .admin-accordion {
+  margin-bottom: 22px;
+}
+
+.wallet-page .admin-accordion .admin-accordion-body {
+  padding-bottom: 18px;
+}
+
+.empty-state {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+  color: var(--text-gray);
+  min-height: 120px;
+}
+
+.empty-state .empty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+/* When the empty-state appears inside the history grid, span full width and center content */
+.wallet-history-cards .empty-state {
+  grid-column: 1 / -1;
+  justify-self: center;
+  text-align: center;
+  max-width: 820px;
+  padding: 24px 0;
+  min-height: 480px;
+}
+
+/* Limit removal of card styling to wallet-specific sections only (avoid breaking admin charts) */
+.wallet-page .info-section,
+.driver-history .info-section,
+.vendor-history .info-section {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Remove card styling for individual card items inside history pages */
+.wallet-page .card-item,
+.driver-history .card-item,
+.driver-history .wallet-history-card,
+.vendor-history .card-item,
+.vendor-history .wallet-history-card {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+
+/* Ensure empty-state in history pages is vertically centered relative to viewport */
+.driver-history .empty-state,
+.vendor-history .empty-state,
+.wallet-page .wallet-history-cards .empty-state {
+  min-height: calc(100vh - 220px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 40px 0;
+}
+
+/* Wallet-specific empty icon (green dollar sign) */
+.wallet-page .empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  color: var(--success-color);
+  font-weight: 800;
+}
+
+@media (min-width: 900px) {
+  .modern-wallet .wallet-history-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Ensure accordion styles override SubPage.css generic h3 styling */
+.wallet-page .admin-accordion.open .admin-accordion-header h3 {
+  color: var(--text-on-primary, #fff) !important;
+  margin: 0;
+}
+
+.wallet-page .admin-accordion .admin-accordion-header h3 {
+  margin: 0;
+  color: inherit;
+}
+
+/* Make sure the accordion background and text work correctly in wallet context */
+.wallet-page .admin-accordion {
+  background: var(--bg-card, var(--bg-white));
+}
+.wallet-page .admin-accordion.open .admin-accordion-header {
+  background: var(--primary-color);
+  color: var(--text-on-primary, #fff);
+}
+.wallet-page .admin-accordion .admin-accordion-body {
+  background: var(--bg-card, var(--bg-white));
+}
+
+/* Ensure wallet analytics containers respect dark mode and remain readable */
+:root.dark-mode .wallet-page .admin-accordion,
+:root.dark-mode .wallet-page .admin-accordion .admin-accordion-body,
+:root.dark-mode .wallet-page .admin-accordion .admin-accordion-header {
+  background: var(--bg-card, #2a2a2a) !important;
+  color: #fff !important;
+  border-color: var(--border-color) !important;
+}
+
+:root.dark-mode .wallet-page .wallet-history-card,
+:root.dark-mode .wallet-page .wallet-amount,
+:root.dark-mode .wallet-page .wallet-label {
+  color: #fff !important;
+}

@@ -24,8 +24,10 @@ export default function useProducts(initialParams = {}) {
     search: '',
     category: 'All',
     minPrice: undefined,
+    minRating: undefined,
     maxPrice: undefined,
     sort: '',
+    vendor: undefined,
     ...initialParams,
   });
 
@@ -34,6 +36,7 @@ export default function useProducts(initialParams = {}) {
     setError(null);
     try {
       const data = await productService.getProducts(queryParams);
+      
       
       // Handle both old (array) and new (object with pagination) response formats
       if (Array.isArray(data)) {
@@ -105,6 +108,16 @@ export default function useProducts(initialParams = {}) {
     setParams(prev => ({ ...prev, sort, page: 1 }));
   }, []);
 
+  // Update vendor filter
+  const setVendor = useCallback((vendor) => {
+    setParams(prev => ({ ...prev, vendor, page: 1 }));
+  }, []);
+
+  // Update minimum rating filter
+  const setMinRating = useCallback((minRating) => {
+    setParams(prev => ({ ...prev, minRating, page: 1 }));
+  }, []);
+
   // Update page
   const setPage = useCallback((page) => {
     setParams(prev => ({ ...prev, page }));
@@ -145,6 +158,8 @@ export default function useProducts(initialParams = {}) {
     setPriceRange,
     setSort,
     setPage,
+    setMinRating,
+    setVendor,
     loadMore,
     resetFilters,
     refresh,

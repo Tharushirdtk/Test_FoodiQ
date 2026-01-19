@@ -7,13 +7,20 @@ const {
   updateProduct,
   deleteProduct,
 } = require('../controllers/productController');
-const { protect } = require('../middleware/auth');
+const multer = require('multer');
 
-router.route('/').get(getProducts).post(protect, createProduct);
+// Use memory storage and upload to Cloudinary from buffer
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+const { protect, requireRole } = require('../middleware/auth');
+
+router.route('/')
+  .get(getProducts)
+  .post(protect, requireRole(['vendor', 'admin']), upload.single('image'), createProduct);
 router
   .route('/:id')
   .get(getProduct)
-  .put(protect, updateProduct)
-  .delete(protect, deleteProduct);
+  .put(protect, requireRole(['vendor', 'admin']), upload.single('image'), updateProduct)
+  .delete(protect, requireRole(['vendor', 'admin']), deleteProduct);
 
 module.exports = router;

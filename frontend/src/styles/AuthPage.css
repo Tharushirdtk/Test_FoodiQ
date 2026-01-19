@@ -202,6 +202,17 @@
   margin-top: 6px;
 }
 
+.password-criteria {
+  margin: 6px 0 0 14px;
+  padding: 0;
+  list-style: disc;
+  color: var(--text-gray);
+  font-size: 12px;
+}
+.password-criteria li {
+  margin: 4px 0;
+}
+
 .remember-forgot {
   display: flex;
   justify-content: space-between;
@@ -548,6 +559,14 @@
 }
 
 /* Phone Input */
+.phone-input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
 .phone-input-wrapper .PhoneInput {
   display: flex;
   gap: 8px;
@@ -626,6 +645,19 @@
 .phone-input-wrapper .PhoneInputInput:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+/* Ensure verify button stays inline and doesn't wrap */
+.phone-input-wrapper .btn,
+.phone-input-wrapper .verify-phone-btn {
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+/* Make the PhoneInput container expand to available space when nested */
+.phone-input-wrapper > div {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* Phone Verification Section */

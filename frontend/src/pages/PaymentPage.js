@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiPlus, FiTrash2, FiX, FiStar } from 'react-icons/fi';
 import paymentService from '../services/paymentService';
 import QuickNavSidebar from '../components/QuickNavSidebar';
+import ConfirmDialog from '../components/ConfirmDialog';
 import Dropdown from '../components/Dropdown';
 import '../styles/SubPage.css';
 
@@ -46,6 +47,8 @@ const PaymentPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   const [formData, setFormData] = useState({
     cardNumber: '',
     expiryMonth: '',
@@ -118,14 +121,21 @@ const PaymentPage = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to remove this payment method?')) {
-      try {
-        await paymentService.deletePaymentMethod(id);
-        loadPaymentMethods();
-      } catch (err) {
-        setError('Failed to remove payment method');
-      }
+  const handleDelete = (id) => {
+    setDeletingId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingId) return;
+    try {
+      await paymentService.deletePaymentMethod(deletingId);
+      loadPaymentMethods();
+    } catch (err) {
+      setError('Failed to remove payment method');
+    } finally {
+      setShowDeleteConfirm(false);
+      setDeletingId(null);
     }
   };
 
@@ -318,6 +328,17 @@ const PaymentPage = () => {
       
       {/* Quick Navigation Sidebar */}
       <QuickNavSidebar />
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => { setShowDeleteConfirm(false); setDeletingId(null); }}
+        onConfirm={confirmDelete}
+        title="Remove Payment Method"
+        message="Are you sure you want to remove this payment method?"
+        confirmText="Remove"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 };

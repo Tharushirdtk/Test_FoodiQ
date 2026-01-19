@@ -15,8 +15,20 @@ function emitToProducts(io, event, payload) {
   io.to('products').emit(event, payload);
 }
 
+function emitToConversation(io, conversationId, event, payload) {
+  if (!io || !conversationId) return;
+  io.to(`conversation:${conversationId}`).emit(event, payload);
+}
+
+function emitToDriver(io, driverId, event, payload) {
+  if (!io || !driverId) return;
+  io.to(`driver:${driverId}`).emit(event, payload);
+}
+
 module.exports = {
   emitToUser,
   emitToOrder,
   emitToProducts,
+  emitToConversation,
+  emitToDriver,
 };

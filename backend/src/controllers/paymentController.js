@@ -28,13 +28,13 @@ exports.createPaymentIntent = async (req, res) => {
     // Generate a mock client secret
     const clientSecret = crypto.randomBytes(32).toString('hex');
 
-    // Attach to order if present
+    // Attach to order if present - preserve any existing payment.method/cardId
     if (order) {
-      order.payment = {
-        status: 'requires_payment',
-        provider: process.env.PAYMENT_PROVIDER || 'mock',
-        providerResponse: { clientSecret, amount: totalAmount },
-      };
+      order.payment = order.payment || {};
+      order.payment.status = 'requires_payment';
+      order.payment.provider = process.env.PAYMENT_PROVIDER || 'mock';
+      order.payment.providerResponse = { clientSecret, amount: totalAmount };
+      // do not clobber order.payment.method or order.payment.cardId if already set
       await order.save();
     }
 

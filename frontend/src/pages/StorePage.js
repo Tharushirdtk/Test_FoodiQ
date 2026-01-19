@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { 
@@ -8,6 +9,8 @@ import {
 } from 'react-icons/fi';
 import '../styles/StorePage.css';
 import useProducts from '../hooks/useProducts';
+import productService from '../services/productService';
+import { useLocation } from 'react-router-dom';
 import MultiSelectDropdown from '../components/MultiSelectDropdown';
 import Dropdown from '../components/Dropdown';
 import NotificationsButton from '../components/NotificationsButton';
@@ -15,30 +18,67 @@ import NotificationsButton from '../components/NotificationsButton';
 const StorePage = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { isGuest } = useAuth();
   const toast = useToast();
   
+  const location = useLocation();
+
+  // Parse URL search params early so UI state initializes from them
+  const parseInitialParams = () => {
+    const sp = new URLSearchParams(location.search);
+    const p = {};
+    if (sp.get('page')) p.page = Number(sp.get('page'));
+    if (sp.get('limit')) p.limit = Number(sp.get('limit'));
+    if (sp.get('search')) p.search = sp.get('search');
+    if (sp.get('category')) p.category = sp.get('category');
+    if (sp.get('minPrice')) p.minPrice = Number(sp.get('minPrice'));
+    if (sp.get('maxPrice')) p.maxPrice = Number(sp.get('maxPrice'));
+    if (sp.get('minRating')) p.minRating = Number(sp.get('minRating'));
+    if (sp.get('sort')) p.sort = sp.get('sort');
+    if (sp.get('vendor')) p.vendor = sp.get('vendor');
+    return p;
+  };
+
+  const initialQuery = parseInitialParams();
+
+  // Derived initial selected categories array for initialization comparisons
+  const initialSelectedCategories = (() => {
+    const cat = initialQuery.category;
+    if (!cat || cat === 'All') return [];
+    return cat.split(',').map(c => c.trim());
+  })();
+
   // View mode: 'grid' | 'list'
   const [viewMode, setViewMode] = useState('grid');
-  
+
   // Local search input state (debounced)
-  const [searchInput, setSearchInput] = useState('');
-  
+  const [searchInput, setSearchInput] = useState(() => initialQuery.search || '');
+
   // Selected categories (multi-select)
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState(() => initialSelectedCategories);
+  // Selected vendor filter
+  const [selectedVendor, setSelectedVendor] = useState(() => initialQuery.vendor || '');
   
   // Price sort state: null | 'asc' | 'desc'
-  const [priceSort, setPriceSort] = useState(null);
+  const [priceSort, setPriceSort] = useState(() => {
+    const s = initialQuery.sort;
+    if (s === 'price_asc') return 'asc';
+    if (s === 'price_desc') return 'desc';
+    return null;
+  });
   
   // Price range modal state
   const [priceRangeModalOpen, setPriceRangeModalOpen] = useState(false);
-  const [localMinPrice, setLocalMinPrice] = useState('');
-  const [localMaxPrice, setLocalMaxPrice] = useState('');
+  const [localMinPrice, setLocalMinPrice] = useState(() => initialQuery.minPrice !== undefined ? String(initialQuery.minPrice) : '');
+  const [localMaxPrice, setLocalMaxPrice] = useState(() => initialQuery.maxPrice !== undefined ? String(initialQuery.maxPrice) : '');
   
   // Rating filter
-  const [minRating, setMinRating] = useState(null);
+  const [minRating, setMinRating] = useState(() => initialQuery.minRating !== undefined ? initialQuery.minRating : null);
   
   // Sort by options
-  const [sortBy, setSortBy] = useState('');
+  const [sortBy, setSortBy] = useState(() => initialQuery.sort || '');
+
+  const initialParams = { limit: 12, ...initialQuery };
 
   const {
     products,
@@ -51,18 +91,40 @@ const StorePage = () => {
     setPriceRange,
     setSort,
     setPage,
-  } = useProducts({ limit: 12 });
+    setMinRating: setMinRatingParam,
+    setVendor,
+  } = useProducts(initialParams);
+
+  // Keep URL in sync with current params so browser back/forward restores state
+  useEffect(() => {
+    const qObj = productService.buildQueryParams(params);
+    const sp = new URLSearchParams();
+    Object.keys(qObj).forEach(k => {
+      if (qObj[k] !== undefined && qObj[k] !== null && qObj[k] !== '') {
+        sp.set(k, String(qObj[k]));
+      }
+    });
+    const search = sp.toString();
+    navigate({ pathname: location.pathname, search: search ? `?${search}` : '' }, { replace: true });
+  }, [params, navigate, location.pathname]);
 
   // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
-      setSearch(searchInput);
+      const initialSearch = initialQuery.search || '';
+      if (searchInput !== initialSearch) {
+        setSearch(searchInput);
+      }
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchInput, setSearch]);
+  }, [searchInput, setSearch, initialQuery.search]);
 
   // Handle category change from multi-select
   useEffect(() => {
+    // Skip updating on mount if selectedCategories matches initial URL value
+    const same = initialSelectedCategories.length === selectedCategories.length && initialSelectedCategories.every((v, i) => v === selectedCategories[i]);
+    if (same) return;
+
     if (selectedCategories.length === 0) {
       setCategory('All');
     } else if (selectedCategories.length === 1) {
@@ -71,7 +133,7 @@ const StorePage = () => {
       // For multiple categories, we'll pass them as comma-separated
       setCategory(selectedCategories.join(','));
     }
-  }, [selectedCategories, setCategory]);
+  }, [selectedCategories, setCategory, initialSelectedCategories]);
 
   // Handle price sort toggle: null → asc → desc → null
   const handlePriceSortToggle = useCallback(() => {
@@ -139,18 +201,15 @@ const StorePage = () => {
     name: p.name,
     description: p.description || '',
     price: Number(p.price) || 0,
-    rating: p.rating || 4.5,
+    rating: (p.rating !== undefined && p.rating !== null) ? Number(p.rating) : 0,
     time: p.time || '15-20 min',
     image: p.image || 'https://via.placeholder.com/400x300',
     category: p.category || 'Other',
     badge: p.badge || '',
   });
 
-  // Filter by rating client-side (if backend doesn't support it)
-  let menuItems = products && products.length > 0 ? products.map(mapProduct) : [];
-  if (minRating) {
-    menuItems = menuItems.filter(item => item.rating >= minRating);
-  }
+  // Map products to menu items (server-side filtering applied)
+  const menuItems = products && products.length > 0 ? products.map(mapProduct) : [];
 
   // Get price sort button icon & state
   const getPriceSortIcon = () => {
@@ -161,7 +220,7 @@ const StorePage = () => {
 
   // Check if any filters are active
   const hasActiveFilters = searchInput || selectedCategories.length > 0 || 
-    params.minPrice || params.maxPrice || priceSort || minRating;
+    params.minPrice || params.maxPrice || priceSort || params.minRating || minRating;
 
   return (
     <div className="store-page">
@@ -173,12 +232,16 @@ const StorePage = () => {
           </button>
           <h1>Menu</h1>
           <div className="header-actions">
-            <button className="btn btn-icon" onClick={() => navigate('/account/favorites')}>
-              <FiHeart size={20} />
-            </button>
-            <div style={{ display: 'inline-block' }}>
-              <NotificationsButton />
-            </div>
+            {!isGuest && (
+              <>
+                <button className="btn btn-icon" onClick={() => navigate('/account/favorites')}>
+                  <FiHeart size={20} />
+                </button>
+                <div style={{ display: 'inline-block' }}>
+                  <NotificationsButton />
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -208,6 +271,29 @@ const StorePage = () => {
               placeholder="Category"
               allOptionLabel="All Categories"
             />
+
+            {/* Vendor Filter - render immediately, disable until vendors are loaded */}
+            {
+              (() => {
+                const hasVendors = Array.isArray(filterOptions.vendors) && filterOptions.vendors.length > 0;
+                const vendorOptions = hasVendors
+                  ? [ { value: '', label: 'All Vendors' }, ...filterOptions.vendors.map((v) => ({ value: v._id || v.id || v.value, label: v.storeName || v.vendorProfile?.storeName || v.displayName || v.name || 'Vendor' })) ]
+                  : [ { value: '', label: 'All Vendors' } ];
+
+                return (
+                  <Dropdown
+                    options={vendorOptions}
+                    value={selectedVendor}
+                    onChange={(val) => {
+                      setSelectedVendor(val || '');
+                      setVendor(val || undefined);
+                    }}
+                    placeholder="Vendor"
+                    disabled={!hasVendors}
+                  />
+                );
+              })()
+            }
 
             {/* Price Sort Toggle */}
             <button
@@ -239,7 +325,11 @@ const StorePage = () => {
                 { value: '3', label: '3+ ⭐' },
               ]}
               value={minRating ? String(minRating) : ''}
-              onChange={(val) => setMinRating(val ? Number(val) : null)}
+              onChange={(val) => {
+                const r = val ? Number(val) : null;
+                setMinRating(r);
+                setMinRatingParam(r);
+              }}
               placeholder="Any Rating"
               size="sm"
             />
@@ -404,7 +494,7 @@ const StorePage = () => {
                       <div className="item-meta">
                         <span className="rating">
                           <FiStar color="#FFA500" fill="#FFA500" size={14} />
-                          {item.rating}
+                          {typeof item.rating === 'number' ? item.rating.toFixed(1) : item.rating}
                         </span>
                         {item.time && (
                           <>
@@ -421,13 +511,39 @@ const StorePage = () => {
                         <span className="price">Rs {item.price.toFixed(2)}</span>
                         <button 
                           className="btn btn-primary btn-sm add-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addToCart(item);
-                            if (toast && typeof toast.showToast === 'function') {
-                              toast.showToast(`${item.name} added to cart`, { type: 'success', duration: 2000 });
-                            }
-                          }}
+                          onClick={async (e) => {
+                              e.stopPropagation();
+                              if (isGuest) {
+                                navigate('/login');
+                                return;
+                              }
+                              try {
+                                const data = await productService.getProduct(item._id || item.id);
+                                const full = data?.product || data || item;
+                                const attrs = [];
+                                const ags = Array.isArray(full.attributeGroups) ? full.attributeGroups : [];
+                                for (const g of ags) {
+                                  const groupKey = g.key || g.title || '';
+                                  if (g.type === 'single-select') {
+                                    const def = (g.attributes || []).find(a => a.defaultSelected);
+                                    if (def) attrs.push({ groupKey, id: def._id || def.id, name: def.name, priceType: def.priceType || 'flat', amount: def.amount || 0, quantity: 1 });
+                                  } else if (g.type === 'multi-select') {
+                                    for (const a of (g.attributes || [])) {
+                                      if (a && a.defaultSelected) attrs.push({ groupKey, id: a._id || a.id, name: a.name, priceType: a.priceType || 'flat', amount: a.amount || 0, quantity: a.quantityEnabled ? (a.defaultQuantity || 1) : 1 });
+                                    }
+                                  }
+                                }
+                                addToCart({ id: full._id || full.id || item.id, name: full.name || item.name, price: Number(full.price || item.price) || 0, image: full.image || item.image, quantity: 1, selectedAttributes: attrs });
+                                if (toast && typeof toast.showToast === 'function') {
+                                  toast.showToast(`${item.name} added to cart`, { type: 'success', duration: 2000 });
+                                }
+                              } catch (err) {
+                                addToCart(item);
+                                if (toast && typeof toast.showToast === 'function') {
+                                  toast.showToast(`${item.name} added to cart`, { type: 'success', duration: 2000 });
+                                }
+                              }
+                            }}
                         >
                           Add +
                         </button>

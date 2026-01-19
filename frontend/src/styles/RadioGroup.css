@@ -1,0 +1,71 @@
+.radio-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.radio-group.vertical {
+  flex-direction: column;
+}
+.radio-group.horizontal {
+  flex-direction: row;
+}
+.radio-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color, #e6e6e6);
+  background: var(--bg-white, #fff);
+  color: var(--text-dark, #222);
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+}
+.radio-button input[type="radio"] {
+  display: none;
+}
+.radio-button:hover {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.radio-button.active {
+  background: var(--primary-color, #FF6B35);
+  color: white;
+  border-color: var(--primary-color, #FF6B35);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.25);
+}
+.radio-button.active .radio-label {
+  color: white;
+}
+.radio-button.active:hover {
+  background: #e55a2b;
+}
+.radio-label {
+  display: inline-block;
+}
+
+/* Disabled state */
+.radio-button.disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.radio-group.disabled .radio-button {
+  pointer-events: none;
+}
+
+/* Disabled appearance: lighter background and grey label */
+.radio-button.disabled {
+  background: var(--bg-light, #f5f5f5);
+}
+.radio-button.disabled .radio-label,
+.radio-group.disabled .radio-button .radio-label {
+  color: var(--text-light, #9ca3af);
+}
+
+/* Utility to center radio groups inside forms */
+.radio-center {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 18px;
+}

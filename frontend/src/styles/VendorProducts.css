@@ -1,0 +1,625 @@
+/* Basic styles for VendorProducts page */
+.page-container {
+  padding: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.header-logo-small {
+  height: 34px;
+}
+
+/* Place actions (Add Product) below header, aligned with page container */
+.top-actions { max-width: 1100px; margin: 0 auto; padding: 6px 20px 0 20px; }
+
+.page-error {
+  background: var(--bg-error, #fdecea);
+  color: var(--danger-color, #b71c1c);
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  position: relative;
+}
+
+.product-card {
+  border: 1px solid var(--border-color, #eee);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-white, #fff);
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 30px rgba(11,15,20,0.06);
+}
+
+.product-thumb {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  background: var(--bg-light, #fafafa);
+}
+
+.product-body {
+  padding: 12px;
+  flex: 1 1 auto;
+}
+
+.product-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.form-card {
+  border: 1px solid var(--border-color, #eee);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--bg-white, #fff);
+}
+
+.form-group {
+  margin-bottom: 10px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 4px;
+}
+
+.muted { color: var(--muted-color, #6b6b6b); }
+
+.btn {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: var(--primary-color, #ff6f3c);
+  color: var(--text-on-primary, #fff);
+  box-shadow: 0 6px 18px rgba(255,111,60,0.18);
+}
+
+/* Disabled button appearance */
+.btn[disabled],
+.btn:disabled,
+.vp-modal-footer .btn[disabled] {
+  background: var(--primary-disabled, #ff8e64) !important;
+  /* border-color: #e0e0e0 !important; */
+  color: var(--text-on-primary, #ffffff) !important;
+  /* box-shadow: none !important; */
+  cursor: not-allowed !important;
+  opacity: 0.95 !important;
+}
+
+.btn-secondary {
+  background: var(--bg-light, #f5f5f5);
+}
+
+.btn-danger {
+  background: var(--danger-color, #d32f2f);
+  color: var(--text-on-primary, white);
+}
+
+.btn-small {
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+/* Modal for Add/Edit product */
+.vp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-color, rgba(0,0,0,0.45));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 6000;
+}
+.vp-modal {
+  background: var(--bg-white, #fff);
+  padding: 18px;
+  border-radius: 8px;
+  max-width: 680px;
+  width: 100%;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* Vendor product modal footer: make actions expanded and centered vertically */
+.vp-modal-footer {
+  display: flex;
+  gap: 12px;
+  padding-top: 12px;
+  margin-top: 8px;
+  align-items: center;
+}
+.vp-modal-footer .btn {
+  flex: 1 1 0;
+  padding: 12px 18px;
+}
+
+.modal-error {
+  background: rgba(244,67,54,0.06);
+  color: var(--danger-color, #d32f2f);
+  border: 1px solid rgba(244,67,54,0.12);
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.price-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: var(--bg-light);
+  border: 1.5px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all .16s ease;
+}
+.price-input-wrapper:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(255,111,60,0.08);
+}
+.price-prefix {
+  padding: 12px 14px;
+  color: var(--text-gray);
+  font-weight: 600;
+  background: var(--bg-light);
+  border-right: 1px solid var(--border-color);
+  flex: 0 0 auto;
+}
+.price-input-wrapper input[type="number"] {
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 12px 14px;
+  font-size: 15px;
+  color: var(--text-dark);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.price-input-wrapper input[type="number"]::-webkit-outer-spin-button,
+.price-input-wrapper input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Variant: use wrapper that mimics edit-profile modal with fixed header/footer and scrollable body */
+.vp-modal-wrapper {
+  background: var(--bg-white);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 920px;
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ensure modal-content + vp-modal-wrapper uses a fixed header/footer with scrollable body
+   and that the overlay sits above app chrome (bottom nav). */
+.modal-content.vp-modal-wrapper {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: calc(100vh - 40px);
+}
+
+/* ensure the modal body scrolls independently and is touch-friendly */
+.vp-modal-body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* raise overlay z-index so modal sits above persistent bottom nav */
+.vp-modal-overlay {
+  z-index: 10050;
+}
+
+/* Ensure edit-profile modal classes (reused in VendorProducts) behave correctly
+   even if global modal styles are present elsewhere. These rules make the
+   modal a vertical flex container with a scrollable content region. */
+.edit-profile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10050;
+  padding: 20px;
+}
+.edit-profile-modal {
+  background: var(--bg-white);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 920px;
+  max-height: calc(100vh - 40px) !important;
+  height: calc(100vh - 40px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+.edit-profile-modal-content {
+  padding: 20px 24px;
+  overflow-y: auto !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  padding-bottom: 140px !important; /* leave room for footer */
+  -webkit-overflow-scrolling: touch;
+  max-height: calc(100vh - 140px) !important;
+}
+
+/* ensure vp-modal-body (alternate class) also uses same enforced rules */
+.vp-modal-body {
+  overflow-y: auto !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  -webkit-overflow-scrolling: touch;
+  max-height: calc(100vh - 140px) !important;
+}
+
+.vp-modal-wrapper .modal-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* compact trash icon button for attribute rows */
+.vp-attr-delete {
+  background: rgba(0,0,0,0.03);
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--danger-color, #d32f2f);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.vp-attr-delete:hover {
+  background: var(--danger-color, #d32f2f);
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(211,47,47,0.18);
+}
+
+/* Group delete icon (small, rounded pale bg) */
+.vp-group-delete {
+  background: rgba(255,111,60,0.06);
+  border: none;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--danger-color, #d32f2f);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.vp-group-delete:hover {
+  background: var(--danger-color, #ff6f3c);
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(255,111,60,0.18);
+}
+
+/* Add Group link-style button */
+.add-group-row {
+  margin-top: 8px;
+  text-align: center;
+}
+.vp-add-group {
+  background: none;
+  border: none;
+  color: var(--primary-color, #ff6f3c);
+  text-decoration: none;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: inline-block;
+}
+.vp-add-group:focus {
+  outline: none;
+}
+
+/* Hover/active animation for Add Group */
+.vp-add-group {
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+.vp-add-group:hover {
+  transform: translateY(-3px) scale(1.02);
+  background-color: rgba(255,111,60,0.06);
+}
+.vp-add-group:active {
+  transform: translateY(0) scale(0.995);
+}
+
+.vp-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-bottom: 120px; /* reserve space for footer */
+}
+
+/* Disabled field visuals inside vendor modal/attribute editor
+   Ensure plain inputs, selects, textareas and file inputs match the
+   common components' disabled appearance (grey text + subtle grey bg). */
+.vp-modal-body input:disabled,
+.vp-modal-body textarea:disabled,
+.vp-modal-body select:disabled,
+.vp-modal-body input[type="file"]:disabled,
+.attribute-field input:disabled,
+.attribute-field select:disabled,
+.attribute-field-group input:disabled,
+.attribute-field-group select:disabled,
+.form-group input:disabled,
+.form-group textarea:disabled {
+  background: var(--bg-light, #f5f5f5);
+  color: var(--text-light, #9ca3af);
+  border-color: var(--border-color);
+  cursor: not-allowed;
+}
+
+/* Make disabled numeric inputs and number prefixes look grey too */
+.vp-modal-body input[type="number"]:disabled {
+  -moz-appearance: textfield;
+}
+
+/* Disabled checkbox labels inside vendor modal */
+.vp-form-checkbox input:disabled + span,
+.attribute-field.checkbox-field input:disabled + span {
+  color: var(--text-light, #9ca3af);
+}
+
+/* Disabled file input - slightly reduce opacity */
+.vp-modal-body input[type="file"]:disabled {
+  opacity: 0.85;
+}
+
+/* Attribute editor: labeled fields and indented rows (tab-like) */
+.attribute-field-group {
+  display: flex;
+  flex-direction: column;
+  margin-right: 8px;
+}
+.attribute-field-group label {
+  font-size: 12px;
+  color: var(--muted-color, #6b6b6b);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.attribute-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 8px;
+  padding-left: 18px; /* tab-like left space for attributes */
+  border-left: 12px solid rgba(255,111,60,0.12); /* thicker, vendor-accent */
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-radius: 6px;
+  background: rgba(250,250,250,0.6);
+}
+.attribute-field.checkbox-field.vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.attribute-field.checkbox-field.vertical .checkbox-top-label {
+  font-size: 12px;
+  color: var(--muted-color, #6b6b6b);
+  font-weight: 600;
+}
+.attribute-field.checkbox-field.vertical .vp-form-checkbox {
+  margin-top: 4px;
+}
+
+.attribute-help {
+  background: rgba(255,111,60,0.03);
+  border-left: 6px solid rgba(255,111,60,0.12);
+  padding: 12px 14px;
+  border-radius: 8px;
+  color: var(--text-dark, #222);
+  font-size: 13px;
+}
+.attribute-help p { margin: 6px 0; color: var(--muted-color, #6b6b6b); }
+
+.attribute-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.attribute-field label {
+  font-size: 12px;
+  color: var(--muted-color, #6b6b6b);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.attribute-field input {
+  min-width: 120px;
+}
+.attribute-field.delete-field {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.checkbox-field input {
+  width: 18px;
+  height: 18px;
+}
+
+/* Vendor-specific checkbox variant to avoid global width rules affecting modal checkboxes */
+.vp-form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vp-form-checkbox input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-color);
+}
+
+/* Fix: checkboxes inside attribute rows were inheriting the
+   `.attribute-field input { min-width: 120px }` rule and becoming wide.
+   Limit that impact only here so other UI is unaffected. */
+.attribute-field input[type="checkbox"] {
+  min-width: 0 !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* Checkbox label alignment for checkbox-type attribute fields (Qty/Default) */
+.attribute-field.checkbox-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+.attribute-field.checkbox-field label {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+
+.vp-modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-white);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2100; /* raised so dropdowns inside modal don't overlap footer */
+  align-items: center;
+  min-height: 72px;
+  box-sizing: border-box;
+}
+
+/* reuse shared form-checkbox look */
+.form-checkbox input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-color);
+}
+
+@media (max-width: 600px) {
+  .vp-modal-wrapper { margin: 14px; border-radius: 12px; }
+  .vp-modal-body { padding: 16px; padding-bottom: 110px; }
+  .vp-modal-footer { padding: 12px 16px; min-height: 64px; }
+}
+
+/* Small screens adjustments */
+@media (max-width: 600px) {
+  .vp-header-inner { padding: 12px; }
+  .product-thumb { height: 120px; }
+  .vp-modal { margin: 14px; }
+}
+
+/* Filter bar for Vendor Products page */
+.vp-filterbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 12px 0 6px 0;
+}
+.vp-filter-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 420px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-white);
+}
+.vp-filter-search input {
+  border: none;
+  outline: none;
+  flex: 1 1 auto;
+  padding: 6px 4px;
+  font-size: 14px;
+}
+.vp-filter-clear { background: transparent; border: none; padding: 6px; cursor: pointer; }
+.vp-filter-controls { display: flex; align-items: center; gap: 12px; }
+
+/* add space between filters and products */
+.filter-bar { margin-bottom: 18px; }
+
+/* products container + loading overlay */
+.products-container { position: relative; }
+.products-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.85);
+  z-index: 20;
+}
+
+/* Slightly lower the spinner so it's not visually cut by the filter row */
+.products-loading-overlay > * {
+  transform: translateY(50px);
+}
+
+/* make action buttons slightly smaller on cards */
+.product-actions .btn-small { padding: 8px 10px; font-size: 14px; }
+.product-actions .vp-action-edit { background: var(--primary-color); color: #fff; margin-right: 8px; }
+.product-actions .vp-action-delete { background: #d32f2f; color: #fff; }
+
+/* Empty state centered when no products */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  min-height: 140px;
+  padding: 20px 12px;
+  color: var(--text-gray);
+}
+.empty-state .empty-icon { font-size: 36px; margin-bottom: 10px; }
+
+/* span full grid so message centers horizontally across the product area */
+.empty-state { grid-column: 1 / -1; }
+
+/* price range modal tweaks */
+.price-range-modal { max-width: 520px; width: 100%; background: var(--bg-white); border-radius: 12px; overflow: hidden; }
+.price-inputs { display:flex; gap:12px; align-items:center; padding:12px 20px; }
+.price-input-group { flex:1 1 auto; }
+.price-input-group label { display:block; margin-bottom:8px; font-size:13px; }
+.price-divider { padding: 0 8px; color: var(--text-gray); }
+.modal-actions .btn { min-width: 96px; }
+

@@ -12,6 +12,12 @@ const authService = {
     return res.data;
   },
 
+  // Step 1 validation-only endpoint
+  validateStep1: async ({ name, email, password, birthdate, gender, role }) => {
+    const res = await api.post('/auth/register/validate-step1', { name, email, password, birthdate, gender, role });
+    return res.data;
+  },
+
   // Step 2: Add contact and address info (legacy)
   registerStep2: async ({ userId, phone, phoneCountry, skipAddress, address }) => {
     const res = await api.post('/auth/register/step2', { userId, phone, phoneCountry, skipAddress, address });

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiMapPin, FiPlus, FiEdit2, FiTrash2, FiX, FiStar } from 'react-icons/fi';
 import addressService from '../services/addressService';
 import QuickNavSidebar from '../components/QuickNavSidebar';
+import ConfirmDialog from '../components/ConfirmDialog';
 import Dropdown from '../components/Dropdown';
 import '../styles/SubPage.css';
 
@@ -13,6 +14,8 @@ const AddressesPage = () => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   const [formData, setFormData] = useState({
     label: 'Home',
     street: '',
@@ -84,14 +87,21 @@ const AddressesPage = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this address?')) {
-      try {
-        await addressService.deleteAddress(id);
-        loadAddresses();
-      } catch (err) {
-        setError('Failed to delete address');
-      }
+  const handleDelete = (id) => {
+    setDeletingId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingId) return;
+    try {
+      await addressService.deleteAddress(deletingId);
+      loadAddresses();
+    } catch (err) {
+      setError('Failed to delete address');
+    } finally {
+      setShowDeleteConfirm(false);
+      setDeletingId(null);
     }
   };
 
@@ -274,6 +284,17 @@ const AddressesPage = () => {
       
       {/* Quick Navigation Sidebar */}
       <QuickNavSidebar />
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => { setShowDeleteConfirm(false); setDeletingId(null); }}
+        onConfirm={confirmDelete}
+        title="Delete Address"
+        message="Are you sure you want to delete this address?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 };

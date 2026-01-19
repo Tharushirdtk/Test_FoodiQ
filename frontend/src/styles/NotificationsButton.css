@@ -1,0 +1,5 @@
+.notifications-list { max-height: 440px; overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; -ms-overflow-style: auto; }
+.notifications-list::-webkit-scrollbar { width: 8px; }
+.notifications-list::-webkit-scrollbar-track { background: transparent; }
+.notifications-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 6px; }
+.notifications-list::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.18); }

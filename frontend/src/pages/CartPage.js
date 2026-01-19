@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import LoadingSpinner from '../components/LoadingSpinner';
+import cartService from '../services/cartService';
 import { useAuth } from '../context/AuthContext';
 import { FiTrash2, FiMinus, FiPlus, FiTag, FiCheck, FiX, FiLoader, FiPhone, FiMapPin, FiUser, FiCreditCard, FiChevronDown, FiEdit2 } from 'react-icons/fi';
 import contactService from '../services/contactService';
@@ -10,11 +12,34 @@ import profileService from '../services/profileService';
 import voucherService from '../services/voucherService';
 import PhoneVerificationModal from '../components/PhoneVerificationModal';
 import '../styles/CartPage.css';
+import EditAttributesModal from '../components/EditAttributesModal';
+import productService from '../services/productService';
+import { computeOrderTotals } from '../utils/computeOrderTotals';
+
+const computeAttributeAmount = (a, basePrice) => {
+  const pt = String(a.priceType || 'flat').toLowerCase();
+  const qty = Number(a.quantity || 1) || 1;
+  const amount = Number(a.amount || 0);
+  if (pt === 'percent') {
+    return Math.round((basePrice * (amount / 100)) * 100) / 100 * qty;
+  }
+  if (pt === 'minus-percent') {
+    // Per requested mapping: minus-percent -> - amount * quantity
+    return - (Math.round(amount * 100) / 100) * qty;
+  }
+  if (pt === 'minus-flat') {
+    // Per requested mapping: minus-flat -> - (base * (amount/100)) * quantity
+    return - (Math.round((basePrice * (amount / 100)) * 100) / 100) * qty;
+  }
+  // flat
+  return (Math.round(amount * 100) / 100) * qty;
+};
 
 const CartPage = () => {
   const navigate = useNavigate();
   const { user, isGuest } = useAuth();
-  const { cartItems, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, getCartTotal, clearCart, loading, refreshCart } = useCart();
+  const { updateItemAttributes } = useCart();
   
   // Order details state
   const [showOrderModal, setShowOrderModal] = useState(false);
@@ -37,7 +62,19 @@ const CartPage = () => {
   
   // Dropdowns open state
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [editingSelectedAttributes, setEditingSelectedAttributes] = useState([]);
+  const [editingLoading, setEditingLoading] = useState(false);
+  const [savingAttributes, setSavingAttributes] = useState(false);
+  const [editingValidationError, setEditingValidationError] = useState('');
   const dropdownRef = useRef(null);
+
+  // Helper: remove any `defaultSelected` flags from attributeGroups when showing in edit modal
+  const stripDefaults = (ags = []) => (ags || []).map(g => ({
+    ...g,
+    attributes: (g.attributes || []).map(a => ({ ...(a || {}), defaultSelected: false }))
+  }));
   
   // Phone verification
   const [showPhoneVerification, setShowPhoneVerification] = useState(false);
@@ -61,21 +98,26 @@ const CartPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [openDropdown]);
 
-  // Calculate totals dynamically
+  // Ensure cart is freshly loaded when this page mounts
+  useEffect(() => {
+    (async () => {
+      try {
+        if (refreshCart) await refreshCart();
+      } catch (e) {
+        // ignore
+      }
+    })();
+  }, [refreshCart]);
+
+  // Calculate totals dynamically using backend-consistent helper
   const subtotal = getCartTotal();
-  const deliveryFee = cartItems.length > 0 ? 200.00 : 0;
-  const salesTax = cartItems.length > 0 ? 50.00 : 0;
-  
-  // Calculate discount from voucher
-  const calculateDiscount = () => {
-    if (!appliedVoucher) return 0;
-    if (appliedVoucher.discountType === 'percent') {
-      return (subtotal * appliedVoucher.amount) / 100;
-    }
-    return appliedVoucher.amount; // flat amount
-  };
-  const discount = calculateDiscount();
-  const total = Math.max(0, subtotal + deliveryFee + salesTax - discount);
+  const promoForCalc = appliedVoucher ? { discountType: appliedVoucher.discountType, amount: appliedVoucher.amount } : null;
+  const totals = computeOrderTotals(cartItems.map(it => ({ price: (Number(it.price || 0) + Number(it.attributesTotal || 0)), quantity: it.quantity, vendor: it.vendor })), promoForCalc);
+  const deliveryFee = totals.deliveryFee;
+  const salesTax = totals.salesTax;
+  const platformFee = totals.platformFee;
+  const discount = totals.promoAmount;
+  const total = totals.total;
 
   const fetchOrderDetails = async () => {
     if (isGuest) return;
@@ -121,6 +163,12 @@ const CartPage = () => {
       setOrderLoading(false);
     }
   };
+
+  useEffect(() => {
+    console.log('[CartPage] cartItems changed:', cartItems);
+    console.log('[CartPage] subtotal:', subtotal);
+    console.log('[CartPage] totals:', { deliveryFee, salesTax, platformFee, discount, total });
+  }, [cartItems, subtotal, deliveryFee, salesTax, platformFee, discount, total]);
 
   const handleProceed = () => {
     if (isGuest) {
@@ -212,12 +260,161 @@ const CartPage = () => {
         contactId: selectedContact?._id,
         addressId: selectedAddress?._id,
         paymentMethodId: selectedPayment?._id,
-        displayName: displayName.trim()
+        displayName: displayName.trim(),
+        appliedVoucher: appliedVoucher || null
       }));
       setShowOrderModal(false);
       navigate('/checkout');
     }
   };
+
+  const openEditAttributes = async (item) => {
+    // Show modal and display authoritative cart item + product attributes while loading
+    setEditingLoading(true);
+    setEditingItem(null);
+    setEditingProduct(null);
+    setEditingSelectedAttributes([]);
+
+    try {
+      // Fetch authoritative cart from server and find this item
+      const cartResp = await cartService.getCart();
+      const items = Array.isArray(cartResp) ? cartResp : (cartResp && cartResp.items) || [];
+      const apiId = item.cartItemId || item.id;
+      const authoritative = items.find(it => (it.cartItemId || it.id) === apiId) || item;
+
+      // set authoritative item into modal
+      setEditingItem(authoritative);
+      console.log('[CartPage.openEditAttributes] authoritative item:', authoritative);
+
+      // normalize existing selections from authoritative cart item
+      // Prefer `options.selectedAttributes` (original selections) and merge with stored snapshots
+      const optsSel = (authoritative.options && Array.isArray(authoritative.options.selectedAttributes)) ? authoritative.options.selectedAttributes : [];
+      const snapSel = (authoritative.selectedAttributes && Array.isArray(authoritative.selectedAttributes)) ? authoritative.selectedAttributes : [];
+      console.log('[CartPage.openEditAttributes] optsSel:', optsSel);
+      console.log('[CartPage.openEditAttributes] snapSel:', snapSel);
+      const existingMap = new Map();
+      optsSel.forEach(s => existingMap.set(String(s.id || s._id || s.attributeId || s.name), s));
+      snapSel.forEach(s => {
+        const key = String(s.id || s._id || s.attributeId || s.name);
+        if (!existingMap.has(key)) existingMap.set(key, s);
+      });
+      const existing = Array.from(existingMap.values());
+
+      const normalized = (existing || []).map(s => ({
+        groupKey: s.groupKey || s.group || s.group_name || s.groupKey || '',
+        id: s.id || s._id || s.attributeId || s.attribute || s.name,
+        name: s.name || s.label || '',
+        priceType: s.priceType || s.type || 'flat',
+        amount: typeof s.amount !== 'undefined' ? s.amount : (s.computedAmount || 0),
+        quantity: s.quantity || 1
+      }));
+      setEditingSelectedAttributes(normalized);
+
+      // Use embedded product attributeGroups from authoritative cart item when available
+      const prodId = authoritative.productId || authoritative.product || authoritative.id || item.productId || item.product || item.id;
+      let latestAGs = [];
+      try {
+        if (authoritative && authoritative.product && Array.isArray(authoritative.product.attributeGroups) && authoritative.product.attributeGroups.length) {
+          latestAGs = authoritative.product.attributeGroups;
+        } else if (prodId) {
+          const resp = await productService.getProduct(prodId);
+          const prod = (resp && (resp.product || resp)) || null;
+          latestAGs = Array.isArray(prod?.attributeGroups) ? prod.attributeGroups : (prod?.attributeGroups || []);
+        }
+
+        setEditingProduct({ attributeGroups: stripDefaults(latestAGs) });
+
+        // Reconcile selections: map existing selected ids to latest attribute definitions
+        const flatAttrs = [];
+        latestAGs.forEach((g) => {
+          (g.attributes || []).forEach((a) => {
+            flatAttrs.push({
+              id: String(a._id || a.id || a.name),
+              groupKey: g.key || g.title || '',
+              name: a.name,
+              priceType: a.priceType || 'flat',
+              amount: a.amount || 0,
+              quantity: 1,
+            });
+          });
+        });
+
+        const reconciled = normalized.map((sel) => {
+          const found = flatAttrs.find(f => String(f.id) === String(sel.id) || String(f.name) === String(sel.id));
+          if (found) return { ...found, quantity: sel.quantity || 1 };
+          return sel;
+        });
+
+        const singleGroups = latestAGs.filter(g => g.type === 'single-select').map(g => (g.key || g.title || '').toString().toLowerCase());
+        const finalSelections = [];
+        for (const sel of reconciled) {
+          const gk = (sel.groupKey || '').toString().toLowerCase();
+          if (singleGroups.includes(gk)) {
+            if (!finalSelections.some(f => (f.groupKey || '').toString().toLowerCase() === gk)) {
+              finalSelections.push(sel);
+            }
+          } else finalSelections.push(sel);
+        }
+
+        setEditingSelectedAttributes(finalSelections);
+      } catch (err) {
+        console.warn('Failed to refresh product attributes for edit modal', err);
+      }
+    } catch (err) {
+      // fallback to snapshot item if anything fails
+      console.warn('Failed to fetch authoritative cart for edit modal', err);
+      setEditingItem(item);
+    } finally {
+      setEditingLoading(false);
+    }
+  };
+
+  const closeEditModal = () => {
+    setEditingItem(null);
+    setEditingProduct(null);
+    setEditingSelectedAttributes([]);
+  };
+
+  const saveEditingAttributes = async () => {
+    if (!editingItem) return;
+    if (savingAttributes) return; // already saving
+    // perform validation against attributeGroups' requiredMin
+    setEditingValidationError('');
+    const ags = (editingProduct && editingProduct.attributeGroups) || (editingItem && editingItem.product && editingItem.product.attributeGroups) || [];
+    const missing = [];
+    if (Array.isArray(ags) && ags.length) {
+      for (const g of ags) {
+        const req = Number(g.requiredMin || 0);
+        if (req > 0) {
+          const key = (g.key || g.title || '').toString().toLowerCase();
+          const count = (editingSelectedAttributes || []).filter(s => (s.groupKey || '').toString().toLowerCase() === key).length;
+          if (count < req) missing.push({ group: g.title || g.key || key, required: req, found: count });
+        }
+      }
+    }
+
+    if (missing.length > 0) {
+      const first = missing[0];
+      setEditingValidationError(`Please select at least ${first.required} option${first.required > 1 ? 's' : ''} for "${first.group}".`);
+      return;
+    }
+
+    setSavingAttributes(true);
+    try {
+      // call context helper
+      await updateItemAttributes(editingItem.cartItemId || editingItem.id, editingSelectedAttributes);
+      closeEditModal();
+    } catch (e) {
+      // errors are handled in context (toasts); keep modal open for retry
+    } finally {
+      setSavingAttributes(false);
+    }
+  };
+
+  // clear validation error when user changes selections
+  useEffect(() => {
+    if (editingSelectedAttributes && editingSelectedAttributes.length >= 0) setEditingValidationError('');
+  }, [editingSelectedAttributes]);
 
   const toggleDropdown = (dropdown) => {
     setOpenDropdown(openDropdown === dropdown ? null : dropdown);
@@ -243,7 +440,12 @@ const CartPage = () => {
       </header>
 
       <div className="cart-content">
-        {cartItems.length === 0 ? (
+        {loading ? (
+          <div className="cart-loading-wrapper">
+            <LoadingSpinner />
+            <p>Loading your cart...</p>
+          </div>
+        ) : cartItems.length === 0 ? (
           <div className="empty-cart">
             <div className="empty-icon">🛒</div>
             <h2>Your cart is empty</h2>
@@ -259,7 +461,7 @@ const CartPage = () => {
               {cartItems.map((item) => {
                 const apiId = item.cartItemId || item.id;
                 return (
-                <div key={item.id} className="cart-item">
+                <div key={apiId} className="cart-item">
                   <div className="item-image">
                     {item.image && item.image.startsWith('http') ? (
                       <img src={item.image} alt={item.name} />
@@ -286,6 +488,104 @@ const CartPage = () => {
                         + {(item.extras || item.options?.extras || []).map(e => typeof e === 'string' ? e : e.name).join(', ')}
                       </p>
                     )}
+                    {/* Show selectedAttributes snapshot if present */}
+                      {((item.selectedAttributes && item.selectedAttributes.length > 0) || item.size) && (
+                        <div className="item-attributes">
+                          {(() => {
+                            const attrs = (item.options && Array.isArray(item.options.selectedAttributes) && item.options.selectedAttributes.length)
+                              ? item.options.selectedAttributes
+                              : (item.selectedAttributes || []);
+                            // ensure size group shown even if amounts are zero
+                            const groups = attrs.reduce((acc, a) => {
+                              const key = a.groupKey || a.group || 'Options';
+                              if (!acc[key]) acc[key] = [];
+                              acc[key].push(a);
+                              return acc;
+                            }, {});
+                            if (item.size && !Object.keys(groups).some(k => /size/i.test(k))) {
+                              groups['Size'] = [{ name: item.size, amount: 0 }];
+                            }
+
+                            // Build entries with metadata so we can order groups:
+                            // 1) size group first
+                            // 2) groups with only non-zero selected attrs
+                            // 3) mixed groups (some zero, some non-zero)
+                            // 4) zero-only groups
+                            const entries = Object.entries(groups).map(([gName, list]) => {
+                              const isSizeGroup = /size/i.test(gName);
+                              const nonZeroAttrs = list.filter((a) => {
+                                const computed = (typeof a.computedAmount !== 'undefined') ? Number(a.computedAmount) : Number(a.amount || 0);
+                                return isSizeGroup || Number(computed) !== 0;
+                              });
+                              const zeroAttrs = list.filter(a => !nonZeroAttrs.includes(a));
+                              return { gName, list, isSizeGroup, nonZeroAttrs, zeroAttrs };
+                            });
+
+                            // extract size entry and classify the rest
+                            const sizeEntryIndex = entries.findIndex(e => e.isSizeGroup);
+                            let sizeEntry = null;
+                            if (sizeEntryIndex >= 0) sizeEntry = entries.splice(sizeEntryIndex, 1)[0];
+
+                            const nonZeroOnly = [];
+                            const mixed = [];
+                            const zeroOnly = [];
+                            entries.forEach((e) => {
+                              if (e.nonZeroAttrs.length > 0 && e.zeroAttrs.length === 0) nonZeroOnly.push(e);
+                              else if (e.nonZeroAttrs.length > 0 && e.zeroAttrs.length > 0) mixed.push(e);
+                              else zeroOnly.push(e);
+                            });
+
+                            const ordered = [];
+                            if (sizeEntry) ordered.push(sizeEntry);
+                            ordered.push(...nonZeroOnly, ...mixed, ...zeroOnly);
+
+                            return ordered.map(({ gName, list, isSizeGroup, nonZeroAttrs, zeroAttrs }) => {
+                              if ((!nonZeroAttrs || nonZeroAttrs.length === 0) && (!zeroAttrs || zeroAttrs.length === 0)) return null;
+                              return (
+                                <div key={gName} className="attr-group">
+                                  {(() => {
+                                    const keyLower = (gName || '').toString().toLowerCase();
+                                    const match = (item.attributeGroups || []).find(g => ((g.key || g.title || '').toString().toLowerCase() === keyLower));
+                                    const display = match ? (match.title || match.key) : (gName === 'Options' ? 'Options' : gName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()));
+                                    return <span className="group-name">{display}</span>;
+                                  })()}
+                                  <div className="group-tags">
+                                    <div className="left-tags">
+                                      {nonZeroAttrs.map((a, idx) => {
+                                        const amt = (typeof a.computedAmount !== 'undefined') ? Number(a.computedAmount) : computeAttributeAmount(a, Number(item.price || 0));
+                                        return (
+                                          <span key={idx} className="option-tag attribute-tag">
+                                            {a.name}{a.quantity && a.quantity > 1 ? ` x${a.quantity}` : ''}
+                                            {!isSizeGroup && Number(amt) !== 0 ? (
+                                              <span className="attr-amt">{Number(amt) >= 0 ? ` +\u00A0Rs\u00A0${Number(amt).toFixed(2)}` : ` -\u00A0Rs\u00A0${Math.abs(Number(amt)).toFixed(2)}`}</span>
+                                            ) : null}
+                                          </span>
+                                        );
+                                      })}
+                                    </div>
+                                    <div className="right-tags">
+                                      {zeroAttrs.map((a, idx) => {
+                                        const amt = (typeof a.computedAmount !== 'undefined') ? Number(a.computedAmount) : computeAttributeAmount(a, Number(item.price || 0));
+                                        return (
+                                          <span key={`z-${idx}`} className="option-tag attribute-tag zero">
+                                            {a.name}{a.quantity && a.quantity > 1 ? ` x${a.quantity}` : ''}
+                                            {!isSizeGroup && Number(amt) !== 0 ? (
+                                              <span className="attr-amt">{Number(amt) >= 0 ? ` +\u00A0Rs\u00A0${Number(amt).toFixed(2)}` : ` -\u00A0Rs\u00A0${Math.abs(Number(amt)).toFixed(2)}`}</span>
+                                            ) : null}
+                                          </span>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            });
+                          })()}
+                          {typeof item.attributesTotal !== 'undefined' && Number(item.attributesTotal) !== 0 && (
+                            <div className="attribute-total">{Number(item.attributesTotal) > 0 ? `+\u00A0Rs\u00A0${Number(item.attributesTotal).toFixed(2)}` : `-\u00A0Rs\u00A0${Math.abs(Number(item.attributesTotal)).toFixed(2)}`}</div>
+                          )}
+                        </div>
+                      )}
                     {((item.instructions && item.instructions.length > 0) || (item.options?.instructions && item.options.instructions.length > 0)) && (
                       <p className="item-instructions">
                         📝 {Array.isArray(item.instructions || item.options?.instructions) 
@@ -294,7 +594,7 @@ const CartPage = () => {
                       </p>
                     )}
                     <div className="item-footer">
-                      <span className="item-price">Rs {(item.price * item.quantity).toFixed(2)}</span>
+                      <span className="item-price">Rs {((Number(item.price || 0) + Number(item.attributesTotal || 0)) * Number(item.quantity || 1)).toFixed(2)}</span>
                       <div className="quantity-control">
                         <button 
                           className="qty-btn"
@@ -313,12 +613,18 @@ const CartPage = () => {
                       </div>
                     </div>
                   </div>
-                  <button 
-                    className="delete-btn"
-                    onClick={() => removeFromCart(apiId)}
-                  >
-                    <FiTrash2 size={18} />
-                  </button>
+                  <div className="item-actions">
+                    <button 
+                      className="delete-btn"
+                      onClick={() => removeFromCart(apiId)}
+                      aria-label="Remove item"
+                    >
+                      <FiTrash2 size={18} />
+                    </button>
+                    <button className="delete-btn edit-btn" onClick={() => openEditAttributes(item)} aria-label="Edit item">
+                      <FiEdit2 size={18} />
+                    </button>
+                  </div>
                 </div>
               )})}
             </div>
@@ -363,6 +669,8 @@ const CartPage = () => {
                       </span>
                     </div>
                   </div>
+
+                  {/* Edit Attributes Modal (moved below) */}
                   <button className="btn-remove-voucher" onClick={handleRemoveVoucher}>
                     <FiX size={18} />
                   </button>
@@ -407,12 +715,16 @@ const CartPage = () => {
                 <span>Rs {deliveryFee.toFixed(2)}</span>
               </div>
               <div className="summary-row">
+                <span>Platform Fee</span>
+                <span>Rs {platformFee.toFixed(2)}</span>
+              </div>
+              <div className="summary-row">
                 <span>Sales Tax</span>
                 <span>Rs {salesTax.toFixed(2)}</span>
               </div>
               {discount > 0 && (
                 <div className="summary-row discount">
-                  <span>Discount ({appliedVoucher?.code})</span>
+                  <span>{`Promo code - ${appliedVoucher?.code}`}</span>
                   <span className="discount-amount">-Rs {discount.toFixed(2)}</span>
                 </div>
               )}
@@ -438,6 +750,18 @@ const CartPage = () => {
       )}
 
       {/* Order Details Modal */}
+      {/* Edit Attributes Modal Component */}
+      <EditAttributesModal
+        editingItem={editingItem}
+        editingProduct={editingProduct}
+        selectedAttributes={editingSelectedAttributes}
+        setSelectedAttributes={setEditingSelectedAttributes}
+        onClose={closeEditModal}
+        onSave={saveEditingAttributes}
+        validationError={editingValidationError}
+        saving={savingAttributes}
+        loading={editingLoading}
+      />
       {showOrderModal && (
         <div className="verification-modal-overlay">
           <div className="verification-modal order-details-modal">

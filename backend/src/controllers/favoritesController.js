@@ -7,10 +7,13 @@ exports.getFavorites = async (req, res) => {
     const userId = req.user && req.user._id;
     if (!userId) return res.status(401).json({ message: 'Not authorized' });
 
+    console.log('[favoritesController] GET favorites for user:', userId);
+
     const favs = await Favorite.find({ user: userId }).populate('product').sort({ createdAt: -1 });
-    return res.status(200).json(favs);
+    console.log('[favoritesController] GET favorites result count:', favs.length);
+    return res.status(200).json({ favorites: favs });
   } catch (error) {
-    console.error(error);
+    console.error('[favoritesController] GET favorites error', error && error.message);
     return res.status(500).json({ message: 'Server error' });
   }
 };
@@ -22,6 +25,7 @@ exports.addFavorite = async (req, res) => {
     if (!userId) return res.status(401).json({ message: 'Not authorized' });
 
     const { productId } = req.body;
+    console.log('[favoritesController] POST addFavorite', { userId, productId });
     if (!productId) return res.status(400).json({ message: 'productId is required' });
 
     const product = await Product.findById(productId);
@@ -35,12 +39,13 @@ exports.addFavorite = async (req, res) => {
     );
 
     const doc = await Favorite.findOne({ user: userId, product: productId }).populate('product');
+    console.log('[favoritesController] POST addFavorite created', doc && doc._id);
     return res.status(201).json(doc);
   } catch (error) {
     if (error.code === 11000) {
       return res.status(200).json({ message: 'Already in favorites' });
     }
-    console.error(error);
+    console.error('[favoritesController] POST addFavorite error', error && error.message);
     return res.status(500).json({ message: 'Server error' });
   }
 };
@@ -52,14 +57,18 @@ exports.removeFavorite = async (req, res) => {
     if (!userId) return res.status(401).json({ message: 'Not authorized' });
 
     const productId = req.params.productId;
+    console.log('[favoritesController] DELETE removeFavorite', { userId, productId });
     if (!productId) return res.status(400).json({ message: 'productId is required' });
 
     const removed = await Favorite.findOneAndDelete({ user: userId, product: productId });
-    if (!removed) return res.status(404).json({ message: 'Favorite not found' });
-
+    if (!removed) {
+      console.log('[favoritesController] DELETE removeFavorite - not found');
+      return res.status(404).json({ message: 'Favorite not found' });
+    }
+    console.log('[favoritesController] DELETE removeFavorite - removed id:', removed._id);
     return res.status(200).json({ message: 'Removed from favorites' });
   } catch (error) {
-    console.error(error);
+    console.error('[favoritesController] DELETE removeFavorite error', error && error.message);
     return res.status(500).json({ message: 'Server error' });
   }
 };

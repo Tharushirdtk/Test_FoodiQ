@@ -39,6 +39,22 @@ export const AuthProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Listen for external signals that the user's profile changed (emitted by socket)
+  useEffect(() => {
+    const handler = async (e) => {
+      try {
+        const payload = e && e.detail ? e.detail : null;
+        if (!payload || !payload.userId) return;
+        // If the update concerns the currently authenticated user, refresh
+        if (user && String(payload.userId) === String(user._id)) {
+          try { await refreshUser(); } catch (err) {}
+        }
+      } catch (err) {}
+    };
+    window.addEventListener('userUpdated', handler);
+    return () => window.removeEventListener('userUpdated', handler);
+  }, [user]);
+
   // Legacy register - redirects to step 1
   const register = async (payload) => {
     return registerStep1(payload);
@@ -47,6 +63,12 @@ export const AuthProvider = ({ children }) => {
   // Step 1: Just validates (no longer creates account)
   const registerStep1 = async (payload) => {
     const data = await authService.registerStep1(payload);
+    return data;
+  };
+
+  // Step1 validation-only wrapper
+  const validateStep1 = async (payload) => {
+    const data = await authService.validateStep1(payload);
     return data;
   };
 
@@ -148,12 +170,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const role = user?.role || null;
   return (
     <AuthContext.Provider value={{ 
       user, 
+      role,
       loading, 
-      register,
-      registerStep1,
+    register,
+    registerStep1,
+    validateStep1,
       registerStep2,
       registerFull,
       login, 

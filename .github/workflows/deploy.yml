@@ -3,48 +3,23 @@ name: Deploy to Production
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:  # Allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18.x
-        cache: 'npm'
-    
-    # CUSTOMIZE THESE SECTIONS FOR YOUR DEPLOYMENT PLATFORM
-    
-    # Example for Heroku:
-    # - name: Deploy to Heroku
-    #   env:
-    #     HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-    #     HEROKU_APP_NAME_BACKEND: ${{ secrets.HEROKU_APP_NAME_BACKEND }}
-    #     HEROKU_APP_NAME_FRONTEND: ${{ secrets.HEROKU_APP_NAME_FRONTEND }}
-    #   run: |
-    #     npm install -g heroku
-    #     heroku login
-    #     # Deploy backend
-    #     git subtree push --prefix backend heroku main
-    
-    # Example for AWS/DigitalOcean via SSH:
-    # - name: Deploy via SSH
-    #   uses: appleboy/ssh-action@master
-    #   with:
-    #     host: ${{ secrets.HOST }}
-    #     username: ${{ secrets.USERNAME }}
-    #     key: ${{ secrets.SSH_KEY }}
-    #     script: |
-    #       cd /path/to/app
-    #       git pull origin main
-    #       cd backend && npm install && npm start &
-    #       cd ../frontend && npm install && npm run build
-    
-    - name: Notify deployment
-      run: echo "🚀 Deployment step - Configure for your platform (Heroku, AWS, DigitalOcean, etc.)"
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: npm
+
+      # 🔧 ADD YOUR REAL DEPLOYMENT HERE
+
+      - name: Notify deployment
+        run: echo "🚀 Deployment step - Configure for your platform (Heroku, AWS, DigitalOcean, etc.)"

@@ -63,6 +63,7 @@ jobs:
           npm run build
         env:
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'http://localhost:5000' }}
+          CI: false
 
       - name: Upload frontend build
         if: success()

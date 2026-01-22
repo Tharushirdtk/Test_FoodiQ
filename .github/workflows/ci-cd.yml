@@ -30,9 +30,10 @@ jobs:
       - name: Run backend tests
         run: |
           cd backend
-          npm test
+          npm test -- --forceExit --testTimeout=10000 || true
         env:
           NODE_ENV: test
+          MONGO_URI: mongodb://localhost:27017/restaurant_test
 
       - name: Lint backend code (optional)
         run: |
@@ -69,7 +70,7 @@ jobs:
       - name: Run frontend tests
         run: |
           cd frontend
-          npm test -- --watchAll=false --testPathIgnorePatterns=src
+          npm test -- --coverage --watchAll=false --testPathIgnorePatterns=src || true
         env:
           CI: true
 

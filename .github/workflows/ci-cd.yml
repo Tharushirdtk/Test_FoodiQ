@@ -1,0 +1,110 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+    
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        npm ci
+    
+    - name: Run backend tests
+      run: |
+        cd backend
+        npm test -- --passWithNoTests
+      env:
+        NODE_ENV: test
+    
+    - name: Lint backend code (optional)
+      run: |
+        cd backend
+        npm run lint --if-present || true
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci
+    
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm run build
+      env:
+        REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'http://localhost:5000' }}
+    
+    - name: Run frontend tests
+      run: |
+        cd frontend
+        npm test -- --passWithNoTests --watchAll=false
+      env:
+        CI: true
+    
+    - name: Upload frontend build
+      uses: actions/upload-artifact@v3
+      if: success()
+      with:
+        name: frontend-build
+        path: frontend/build/
+        retention-days: 5
+
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
+    
+    - name: Check for security vulnerabilities
+      run: |
+        cd backend && npm audit --audit-level=moderate || true
+        cd ../frontend && npm audit --audit-level=moderate || true
+
+  build-success:
+    needs: [test-backend, test-frontend, code-quality]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: All checks passed
+      run: echo "✅ CI/CD Pipeline completed successfully!"

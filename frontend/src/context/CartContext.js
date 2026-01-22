@@ -170,13 +170,16 @@ export const CartProvider = ({ children }) => {
 
     // optimistic local update with temporary cartItemId to keep React keys unique
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    let isUpdatingExisting = false;
+    
     setCartItems((prevItems) => {
-      // Check if item with same id AND same options (including selectedAttributes) exists
+      // Check if item with same product id AND same options (including selectedAttributes) exists
       const existingItem = prevItems.find((i) =>
         i.id === item.id &&
         JSON.stringify(i.options) === JSON.stringify(options)
       );
       if (existingItem) {
+        isUpdatingExisting = true;
         return prevItems.map((i) =>
           i.id === item.id && JSON.stringify(i.options) === JSON.stringify(options)
             ? { ...i, quantity: i.quantity + quantity }
@@ -210,23 +213,25 @@ export const CartProvider = ({ children }) => {
           // Map server item to our frontend shape (includes computed attributesTotal)
           const mappedCreated = mapBackendItem(created);
           console.log('[addToCart] mappedCreated:', mappedCreated);
-          setCartItems((prev) => {
-            const foundIndex = prev.findIndex((i) => (
-              (i.cartItemId && String(i.cartItemId).startsWith('temp-') && JSON.stringify(i.options) === JSON.stringify(options)) ||
-              (i.id === item.id && JSON.stringify(i.options) === JSON.stringify(options))
-            ));
-            if (foundIndex !== -1) {
-              // replace optimistic entry with authoritative mapped item
-              const copy = prev.slice();
-              copy[foundIndex] = mappedCreated;
-              return copy;
-            }
-            // If we couldn't find the optimistic item, append the server item
-            return [...prev, mappedCreated];
-          });
+          
+          // IMPORTANT: Always refresh the entire cart from the server after add to ensure correctness
+          // This prevents duplicate display and race condition issues
+          const cartData = await cartService.getCart();
+          const cartItems = Array.isArray(cartData) ? cartData : cartData.items || [];
+          const mapped = cartItems.map(mapBackendItem);
+          setCartItems(mapped);
         }
       } catch (err) {
-        // ignore
+        console.error('[addToCart] error:', err);
+        // On error, refresh cart to get authoritative state
+        try {
+          const cartData = await cartService.getCart();
+          const cartItems = Array.isArray(cartData) ? cartData : cartData.items || [];
+          const mapped = cartItems.map(mapBackendItem);
+          setCartItems(mapped);
+        } catch (e) {
+          // ignore
+        }
       }
     })();
   };
@@ -246,7 +251,28 @@ export const CartProvider = ({ children }) => {
         } else {
           await cartService.removeFromCart(backendId);
         }
-      } catch (e) {}
+        
+        // Refresh cart after deletion to ensure consistency
+        try {
+          const cartData = await cartService.getCart();
+          const items = Array.isArray(cartData) ? cartData : cartData.items || [];
+          const mapped = items.map(mapBackendItem);
+          setCartItems(mapped);
+        } catch (e) {
+          // ignore refresh error
+        }
+      } catch (e) {
+        console.error('[removeFromCart] error:', e);
+        // On error, refresh cart to get authoritative state
+        try {
+          const cartData = await cartService.getCart();
+          const items = Array.isArray(cartData) ? cartData : cartData.items || [];
+          const mapped = items.map(mapBackendItem);
+          setCartItems(mapped);
+        } catch (err) {
+          // ignore
+        }
+      }
     })();
   };
 
@@ -273,7 +299,28 @@ export const CartProvider = ({ children }) => {
         } else {
           await cartService.updateCartItem(backendId, quantity);
         }
-      } catch (e) {}
+        
+        // Refresh cart after update to ensure consistency
+        try {
+          const cartData = await cartService.getCart();
+          const items = Array.isArray(cartData) ? cartData : cartData.items || [];
+          const mapped = items.map(mapBackendItem);
+          setCartItems(mapped);
+        } catch (e) {
+          // ignore refresh error
+        }
+      } catch (e) {
+        console.error('[updateQuantity] error:', e);
+        // On error, refresh cart to get authoritative state
+        try {
+          const cartData = await cartService.getCart();
+          const items = Array.isArray(cartData) ? cartData : cartData.items || [];
+          const mapped = items.map(mapBackendItem);
+          setCartItems(mapped);
+        } catch (err) {
+          // ignore
+        }
+      }
     })();
   };
 

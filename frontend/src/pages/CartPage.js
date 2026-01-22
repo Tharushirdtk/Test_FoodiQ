@@ -107,7 +107,7 @@ const CartPage = () => {
         // ignore
       }
     })();
-  }, [refreshCart]);
+  }, []);
 
   // Calculate totals dynamically using backend-consistent helper
   const subtotal = getCartTotal();
@@ -163,12 +163,6 @@ const CartPage = () => {
       setOrderLoading(false);
     }
   };
-
-  useEffect(() => {
-    console.log('[CartPage] cartItems changed:', cartItems);
-    console.log('[CartPage] subtotal:', subtotal);
-    console.log('[CartPage] totals:', { deliveryFee, salesTax, platformFee, discount, total });
-  }, [cartItems, subtotal, deliveryFee, salesTax, platformFee, discount, total]);
 
   const handleProceed = () => {
     if (isGuest) {

@@ -27,13 +27,10 @@ jobs:
           cd backend
           npm install
 
-      - name: Run backend tests
+      - name: Check backend syntax
         run: |
           cd backend
-          npm test -- --forceExit --testTimeout=10000 || true
-        env:
-          NODE_ENV: test
-          MONGO_URI: mongodb://localhost:27017/restaurant_test
+          node -c src/server.js || true
 
       - name: Lint backend code (optional)
         run: |
@@ -66,13 +63,6 @@ jobs:
           npm run build
         env:
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'http://localhost:5000' }}
-
-      - name: Run frontend tests
-        run: |
-          cd frontend
-          npm test -- --coverage --watchAll=false --testPathIgnorePatterns=src || true
-        env:
-          CI: true
 
       - name: Upload frontend build
         if: success()

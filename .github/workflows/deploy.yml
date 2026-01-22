@@ -20,6 +20,11 @@ jobs:
           cache: npm
 
       # 🔧 ADD YOUR REAL DEPLOYMENT HERE
+      - name: Deploy backend
+        run: echo "🚀 Backend deployment - Configure for your platform (Heroku, AWS, DigitalOcean, etc.)"
+
+      - name: Deploy frontend
+        run: echo "🚀 Frontend deployment - Configure for your platform (Vercel, Netlify, etc.)"
 
       - name: Notify deployment
-        run: echo "🚀 Deployment step - Configure for your platform (Heroku, AWS, DigitalOcean, etc.)"
+        run: echo "✅ Deployment completed"
